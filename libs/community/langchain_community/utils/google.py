@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 
 def get_client_info(module: Optional[str] = None) -> Any:
-    r"""Return a custom user agent header.
+    r"""Returns a custom user agent header.
 
     Args:
         module (Optional[str]):

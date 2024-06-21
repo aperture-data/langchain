@@ -150,7 +150,7 @@ class _AnthropicCommon(BaseLanguageModel):
 
 @deprecated(
     since="0.0.28",
-    removal="0.3",
+    removal="0.2",
     alternative_import="langchain_anthropic.AnthropicLLM",
 )
 class Anthropic(LLM, _AnthropicCommon):
@@ -170,13 +170,13 @@ class Anthropic(LLM, _AnthropicCommon):
 
             # Simplest invocation, automatically wrapped with HUMAN_PROMPT
             # and AI_PROMPT.
-            response = model.invoke("What are the biggest risks facing humanity?")
+            response = model("What are the biggest risks facing humanity?")
 
             # Or if you want to use the chat mode, build a few-shot-prompt, or
             # put words in the Assistant's mouth, use HUMAN_PROMPT and AI_PROMPT:
             raw_prompt = "What are the biggest risks facing humanity?"
             prompt = f"{anthropic.HUMAN_PROMPT} {prompt}{anthropic.AI_PROMPT}"
-            response = model.invoke(prompt)
+            response = model(prompt)
     """
 
     class Config:
@@ -236,7 +236,7 @@ class Anthropic(LLM, _AnthropicCommon):
 
                 prompt = "What are the biggest risks facing humanity?"
                 prompt = f"\n\nHuman: {prompt}\n\nAssistant:"
-                response = model.invoke(prompt)
+                response = model(prompt)
 
         """
         if self.streaming:

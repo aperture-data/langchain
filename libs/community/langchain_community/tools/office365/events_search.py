@@ -54,7 +54,7 @@ class SearchEventsInput(BaseModel):
 
 
 class O365SearchEvents(O365BaseTool):
-    """Search calendar events in Office 365.
+    """Class for searching calendar events in Office 365
 
     Free, but setup is required
     """

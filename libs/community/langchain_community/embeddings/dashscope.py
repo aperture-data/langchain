@@ -110,7 +110,7 @@ class DashScopeEmbeddings(BaseModel, Embeddings):
 
         extra = Extra.forbid
 
-    @root_validator(pre=True)
+    @root_validator()
     def validate_environment(cls, values: Dict) -> Dict:
         import dashscope
 

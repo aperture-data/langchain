@@ -40,7 +40,7 @@ class LLMThoughtState(Enum):
 
 
 class ToolRecord(NamedTuple):
-    """Tool record as a NamedTuple."""
+    """The tool record as a NamedTuple."""
 
     name: str
     input_str: str

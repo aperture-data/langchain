@@ -12,12 +12,7 @@ from langchain_core.load.mapping import (
 )
 from langchain_core.load.serializable import Serializable
 
-DEFAULT_NAMESPACES = [
-    "langchain",
-    "langchain_core",
-    "langchain_community",
-    "langchain_anthropic",
-]
+DEFAULT_NAMESPACES = ["langchain", "langchain_core", "langchain_community"]
 
 ALL_SERIALIZABLE_MAPPINGS = {
     **SERIALIZABLE_MAPPING,

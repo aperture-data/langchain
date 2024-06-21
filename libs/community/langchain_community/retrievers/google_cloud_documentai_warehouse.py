@@ -1,5 +1,4 @@
 """Retriever wrapper for Google Cloud Document AI Warehouse."""
-
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from langchain_core._api.deprecation import deprecated
@@ -24,15 +23,15 @@ if TYPE_CHECKING:
 
 @deprecated(
     since="0.0.32",
-    removal="0.3.0",
-    alternative_import="langchain_google_community.DocumentAIWarehouseRetriever",
+    removal="0.2.0",
+    alternative_import="langchain_google_community.GoogleDriveLoader",
 )
 class GoogleDocumentAIWarehouseRetriever(BaseRetriever):
     """A retriever based on Document AI Warehouse.
 
     Documents should be created and documents should be uploaded
         in a separate flow, and this retriever uses only Document AI
-        schema_id provided to search for relevant documents.
+        schema_id provided to search for revelant documents.
 
     More info: https://cloud.google.com/document-ai-warehouse.
     """
@@ -51,7 +50,7 @@ class GoogleDocumentAIWarehouseRetriever(BaseRetriever):
     @root_validator()
     def validate_environment(cls, values: Dict) -> Dict:
         """Validates the environment."""
-        try:
+        try:  # noqa: F401
             from google.cloud.contentwarehouse_v1 import DocumentServiceClient
         except ImportError as exc:
             raise ImportError(

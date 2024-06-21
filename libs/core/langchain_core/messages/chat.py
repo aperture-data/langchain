@@ -15,7 +15,6 @@ class ChatMessage(BaseMessage):
     """The speaker / role of the Message."""
 
     type: Literal["chat"] = "chat"
-    """The type of the message (used during serialization)."""
 
     @classmethod
     def get_lc_namespace(cls) -> List[str]:
@@ -33,7 +32,6 @@ class ChatMessageChunk(ChatMessage, BaseMessageChunk):
     # to make sure that the chunk variant can be discriminated from the
     # non-chunk variant.
     type: Literal["ChatMessageChunk"] = "ChatMessageChunk"  # type: ignore
-    """The type of the message (used during serialization)."""
 
     @classmethod
     def get_lc_namespace(cls) -> List[str]:

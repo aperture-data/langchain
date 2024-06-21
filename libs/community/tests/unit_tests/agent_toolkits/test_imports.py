@@ -1,4 +1,4 @@
-from langchain_community.agent_toolkits import __all__, _module_lookup
+from langchain_community.agent_toolkits import __all__
 
 EXPECTED_ALL = [
     "AINetworkToolkit",
@@ -35,4 +35,3 @@ EXPECTED_ALL = [
 
 def test_all_imports() -> None:
     assert set(__all__) == set(EXPECTED_ALL)
-    assert set(__all__) == set(_module_lookup.keys())

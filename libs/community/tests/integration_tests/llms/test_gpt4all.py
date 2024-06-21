@@ -21,5 +21,5 @@ def test_gpt4all_inference() -> None:
     """Test valid gpt4all inference."""
     model_path = _download_model()
     llm = GPT4All(model=model_path)
-    output = llm.invoke("Say foo:")
+    output = llm("Say foo:")
     assert isinstance(output, str)

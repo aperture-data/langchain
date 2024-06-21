@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 from urllib.parse import parse_qs, urlparse
 
 from langchain_core.documents import Document
@@ -99,8 +99,8 @@ class GoogleApiClient:
         return creds
 
 
-ALLOWED_SCHEMES = {"http", "https"}
-ALLOWED_NETLOCS = {
+ALLOWED_SCHEMAS = {"http", "https"}
+ALLOWED_NETLOCK = {
     "youtu.be",
     "m.youtube.com",
     "youtube.com",
@@ -111,13 +111,13 @@ ALLOWED_NETLOCS = {
 
 
 def _parse_video_id(url: str) -> Optional[str]:
-    """Parse a YouTube URL and return the video ID if valid, otherwise None."""
+    """Parse a youtube url and return the video id if valid, otherwise None."""
     parsed_url = urlparse(url)
 
-    if parsed_url.scheme not in ALLOWED_SCHEMES:
+    if parsed_url.scheme not in ALLOWED_SCHEMAS:
         return None
 
-    if parsed_url.netloc not in ALLOWED_NETLOCS:
+    if parsed_url.netloc not in ALLOWED_NETLOCK:
         return None
 
     path = parsed_url.path
@@ -141,15 +141,14 @@ def _parse_video_id(url: str) -> Optional[str]:
 
 
 class TranscriptFormat(Enum):
-    """Output formats of transcripts from `YoutubeLoader`."""
+    """Transcript format."""
 
     TEXT = "text"
     LINES = "lines"
-    CHUNKS = "chunks"
 
 
 class YoutubeLoader(BaseLoader):
-    """Load `YouTube` video transcripts."""
+    """Load `YouTube` transcripts."""
 
     def __init__(
         self,
@@ -159,11 +158,9 @@ class YoutubeLoader(BaseLoader):
         translation: Optional[str] = None,
         transcript_format: TranscriptFormat = TranscriptFormat.TEXT,
         continue_on_failure: bool = False,
-        chunk_size_seconds: int = 120,
     ):
         """Initialize with YouTube video ID."""
         self.video_id = video_id
-        self._metadata = {"source": video_id}
         self.add_video_info = add_video_info
         self.language = language
         if isinstance(language, str):
@@ -173,69 +170,25 @@ class YoutubeLoader(BaseLoader):
         self.translation = translation
         self.transcript_format = transcript_format
         self.continue_on_failure = continue_on_failure
-        self.chunk_size_seconds = chunk_size_seconds
 
     @staticmethod
     def extract_video_id(youtube_url: str) -> str:
-        """Extract video ID from common YouTube URLs."""
+        """Extract video id from common YT urls."""
         video_id = _parse_video_id(youtube_url)
         if not video_id:
             raise ValueError(
-                f'Could not determine the video ID for the URL "{youtube_url}".'
+                f"Could not determine the video ID for the URL {youtube_url}"
             )
         return video_id
 
     @classmethod
     def from_youtube_url(cls, youtube_url: str, **kwargs: Any) -> YoutubeLoader:
-        """Given a YouTube URL, construct a loader.
-        See `YoutubeLoader()` constructor for a list of keyword arguments.
-        """
+        """Given youtube URL, load video."""
         video_id = cls.extract_video_id(youtube_url)
         return cls(video_id, **kwargs)
 
-    def _make_chunk_document(
-        self, chunk_pieces: List[Dict], chunk_start_seconds: int
-    ) -> Document:
-        """Create Document from chunk of transcript pieces."""
-        m, s = divmod(chunk_start_seconds, 60)
-        h, m = divmod(m, 60)
-        return Document(
-            page_content=" ".join(
-                map(lambda chunk_piece: chunk_piece["text"].strip(" "), chunk_pieces)
-            ),
-            metadata={
-                **self._metadata,
-                "start_seconds": chunk_start_seconds,
-                "start_timestamp": f"{h:02d}:{m:02d}:{s:02d}",
-                "source":
-                # replace video ID with URL to start time
-                f"https://www.youtube.com/watch?v={self.video_id}"
-                f"&t={chunk_start_seconds}s",
-            },
-        )
-
-    def _get_transcript_chunks(
-        self, transcript_pieces: List[Dict]
-    ) -> Generator[Document, None, None]:
-        chunk_pieces: List[Dict[str, Any]] = []
-        chunk_start_seconds = 0
-        chunk_time_limit = self.chunk_size_seconds
-        for transcript_piece in transcript_pieces:
-            piece_end = transcript_piece["start"] + transcript_piece["duration"]
-            if piece_end > chunk_time_limit:
-                if chunk_pieces:
-                    yield self._make_chunk_document(chunk_pieces, chunk_start_seconds)
-                chunk_pieces = []
-                chunk_start_seconds = chunk_time_limit
-                chunk_time_limit += self.chunk_size_seconds
-
-            chunk_pieces.append(transcript_piece)
-
-        if len(chunk_pieces) > 0:
-            yield self._make_chunk_document(chunk_pieces, chunk_start_seconds)
-
     def load(self) -> List[Document]:
-        """Load YouTube transcripts into `Document` objects."""
+        """Load documents."""
         try:
             from youtube_transcript_api import (
                 NoTranscriptFound,
@@ -244,15 +197,17 @@ class YoutubeLoader(BaseLoader):
             )
         except ImportError:
             raise ImportError(
-                'Could not import "youtube_transcript_api" Python package. '
+                "Could not import youtube_transcript_api python package. "
                 "Please install it with `pip install youtube-transcript-api`."
             )
+
+        metadata = {"source": self.video_id}
 
         if self.add_video_info:
             # Get more video meta info
             # Such as title, description, thumbnail url, publish_date
             video_info = self._get_video_info()
-            self._metadata.update(video_info)
+            metadata.update(video_info)
 
         try:
             transcript_list = YouTubeTranscriptApi.list_transcripts(self.video_id)
@@ -267,45 +222,31 @@ class YoutubeLoader(BaseLoader):
         if self.translation is not None:
             transcript = transcript.translate(self.translation)
 
-        transcript_pieces: List[Dict[str, Any]] = transcript.fetch()
+        transcript_pieces = transcript.fetch()
 
         if self.transcript_format == TranscriptFormat.TEXT:
-            transcript = " ".join(
-                map(
-                    lambda transcript_piece: transcript_piece["text"].strip(" "),
-                    transcript_pieces,
-                )
-            )
-            return [Document(page_content=transcript, metadata=self._metadata)]
+            transcript = " ".join([t["text"].strip(" ") for t in transcript_pieces])
+            return [Document(page_content=transcript, metadata=metadata)]
         elif self.transcript_format == TranscriptFormat.LINES:
-            return list(
-                map(
-                    lambda transcript_piece: Document(
-                        page_content=transcript_piece["text"].strip(" "),
-                        metadata=dict(
-                            filter(
-                                lambda item: item[0] != "text", transcript_piece.items()
-                            )
-                        ),
-                    ),
-                    transcript_pieces,
+            return [
+                Document(
+                    page_content=t["text"].strip(" "),
+                    metadata=dict((key, t[key]) for key in t if key != "text"),
                 )
-            )
-        elif self.transcript_format == TranscriptFormat.CHUNKS:
-            return list(self._get_transcript_chunks(transcript_pieces))
-
+                for t in transcript_pieces
+            ]
         else:
             raise ValueError("Unknown transcript format.")
 
-    def _get_video_info(self) -> Dict:
+    def _get_video_info(self) -> dict:
         """Get important video information.
 
-        Components include:
+        Components are:
             - title
             - description
-            - thumbnail URL,
+            - thumbnail url,
             - publish_date
-            - channel author
+            - channel_author
             - and more.
         """
         try:
@@ -313,7 +254,7 @@ class YoutubeLoader(BaseLoader):
 
         except ImportError:
             raise ImportError(
-                'Could not import "pytube" Python package. '
+                "Could not import pytube python package. "
                 "Please install it with `pip install pytube`."
             )
         yt = YouTube(f"https://www.youtube.com/watch?v={self.video_id}")

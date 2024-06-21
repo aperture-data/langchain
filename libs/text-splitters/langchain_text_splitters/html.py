@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import pathlib
 from io import BytesIO, StringIO
 from typing import Any, Dict, Iterable, List, Optional, Tuple, TypedDict, cast
@@ -172,7 +173,7 @@ class HTMLSectionSplitter:
     def __init__(
         self,
         headers_to_split_on: List[Tuple[str, str]],
-        xslt_path: Optional[str] = None,
+        xslt_path: str = "xsl/converting_to_header.xslt",
         **kwargs: Any,
     ) -> None:
         """Create a new HTMLSectionSplitter.
@@ -182,17 +183,10 @@ class HTMLSectionSplitter:
                 (arbitrary) keys for metadata. Allowed header values: h1, h2, h3, h4,
                 h5, h6 e.g. [("h1", "Header 1"), ("h2", "Header 2"].
             xslt_path: path to xslt file for document transformation.
-            Uses a default if not passed.
             Needed for html contents that using different format and layouts.
         """
         self.headers_to_split_on = dict(headers_to_split_on)
-
-        if xslt_path is None:
-            self.xslt_path = (
-                pathlib.Path(__file__).parent / "xsl/converting_to_header.xslt"
-            ).absolute()
-        else:
-            self.xslt_path = pathlib.Path(xslt_path).absolute()
+        self.xslt_path = xslt_path
         self.kwargs = kwargs
 
     def split_documents(self, documents: Iterable[Document]) -> List[Document]:
@@ -233,7 +227,9 @@ class HTMLSectionSplitter:
                 documents.append(new_doc)
         return documents
 
-    def split_html_by_headers(self, html_doc: str) -> List[Dict[str, Optional[str]]]:
+    def split_html_by_headers(
+        self, html_doc: str
+    ) -> Dict[str, Dict[str, Optional[str]]]:
         try:
             from bs4 import BeautifulSoup, PageElement  # type: ignore[import-untyped]
         except ImportError as e:
@@ -245,7 +241,7 @@ class HTMLSectionSplitter:
 
         soup = BeautifulSoup(html_doc, "html.parser")
         headers = list(self.headers_to_split_on.keys())
-        sections: list[dict[str, str | None]] = []
+        sections: Dict[str, Dict[str, Optional[str]]] = {}
 
         headers = soup.find_all(["body"] + headers)
 
@@ -267,13 +263,10 @@ class HTMLSectionSplitter:
             content = " ".join(section_content).strip()
 
             if content != "":
-                sections.append(
-                    {
-                        "header": current_header,
-                        "content": content,
-                        "tag_name": current_header_tag,
-                    }
-                )
+                sections[current_header] = {
+                    "content": content,
+                    "tag_name": current_header_tag,
+                }
 
         return sections
 
@@ -291,7 +284,13 @@ class HTMLSectionSplitter:
         parser = etree.HTMLParser()
         tree = etree.parse(StringIO(html_content), parser)
 
-        xslt_tree = etree.parse(self.xslt_path)
+        # document transformation for "structure-aware" chunking is handled with xsl.
+        # this is needed for htmls files that using different font sizes and layouts
+        # check to see if self.xslt_path is a relative path or absolute path
+        if not os.path.isabs(self.xslt_path):
+            xslt_path = pathlib.Path(__file__).parent / self.xslt_path
+
+        xslt_tree = etree.parse(xslt_path)
         transform = etree.XSLT(xslt_tree)
         result = transform(tree)
         return str(result)
@@ -308,12 +307,12 @@ class HTMLSectionSplitter:
 
         return [
             Document(
-                cast(str, section["content"]),
+                cast(str, sections[section_key]["content"]),
                 metadata={
-                    self.headers_to_split_on[str(section["tag_name"])]: section[
-                        "header"
-                    ]
+                    self.headers_to_split_on[
+                        str(sections[section_key]["tag_name"])
+                    ]: section_key
                 },
             )
-            for section in sections
+            for section_key in sections.keys()
         ]

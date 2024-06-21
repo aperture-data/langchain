@@ -1,5 +1,4 @@
 """OpenAI chat wrapper."""
-
 from __future__ import annotations
 
 import logging
@@ -68,7 +67,7 @@ def _import_tiktoken() -> Any:
     try:
         import tiktoken
     except ImportError:
-        raise ImportError(
+        raise ValueError(
             "Could not import tiktoken python package. "
             "This is needed in order to calculate get_token_ids. "
             "Please install it with `pip install tiktoken`."
@@ -140,13 +139,13 @@ def _convert_delta_to_message_chunk(
     elif role == "tool" or default_class == ToolMessageChunk:
         return ToolMessageChunk(content=content, tool_call_id=_dict["tool_call_id"])
     elif role or default_class == ChatMessageChunk:
-        return ChatMessageChunk(content=content, role=role)  # type: ignore[arg-type]
+        return ChatMessageChunk(content=content, role=role)
     else:
-        return default_class(content=content)  # type: ignore[call-arg]
+        return default_class(content=content)
 
 
 @deprecated(
-    since="0.0.10", removal="0.3.0", alternative_import="langchain_openai.ChatOpenAI"
+    since="0.0.10", removal="0.2.0", alternative_import="langchain_openai.ChatOpenAI"
 )
 class ChatOpenAI(BaseChatModel):
     """`OpenAI` Chat large language models API.
@@ -161,7 +160,7 @@ class ChatOpenAI(BaseChatModel):
         .. code-block:: python
 
             from langchain_community.chat_models import ChatOpenAI
-            openai = ChatOpenAI(model="gpt-3.5-turbo")
+            openai = ChatOpenAI(model_name="gpt-3.5-turbo")
     """
 
     @property
@@ -218,7 +217,7 @@ class ChatOpenAI(BaseChatModel):
     )
     """Timeout for requests to OpenAI completion API. Can be float, httpx.Timeout or 
         None."""
-    max_retries: int = Field(default=2)
+    max_retries: int = 2
     """Maximum number of retries to make when generating."""
     streaming: bool = False
     """Whether to stream the results or not."""

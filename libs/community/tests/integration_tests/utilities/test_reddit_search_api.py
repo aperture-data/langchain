@@ -5,7 +5,7 @@ from langchain_community.utilities.reddit_search import RedditSearchAPIWrapper
 
 @pytest.fixture
 def api_client() -> RedditSearchAPIWrapper:
-    return RedditSearchAPIWrapper()  # type: ignore[call-arg]
+    return RedditSearchAPIWrapper()
 
 
 def assert_results_exists(results: list) -> None:

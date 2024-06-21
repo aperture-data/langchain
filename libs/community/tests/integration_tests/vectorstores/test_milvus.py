@@ -26,7 +26,7 @@ def _milvus_from_texts(
 
 
 def _get_pks(expr: str, docsearch: Milvus) -> List[Any]:
-    return docsearch.get_pks(expr)  # type: ignore[return-value]
+    return docsearch.get_pks(expr)
 
 
 def test_milvus() -> None:
@@ -51,7 +51,7 @@ def test_milvus_with_id() -> None:
     assert output == [Document(page_content="foo")]
 
     output = docsearch.delete(ids=ids)
-    assert output.delete_count == len(fake_texts)  # type: ignore[attr-defined]
+    assert output.delete_count == len(fake_texts)
 
     try:
         ids = ["dup_id" for _ in fake_texts]
@@ -146,7 +146,7 @@ def test_milvus_upsert_entities() -> None:
         Document(page_content="test_2", metadata={"id": 3}),
     ]
     ids = docsearch.upsert(pks, documents)
-    assert len(ids) == 2  # type: ignore[arg-type]
+    assert len(ids) == 2
 
 
 # if __name__ == "__main__":

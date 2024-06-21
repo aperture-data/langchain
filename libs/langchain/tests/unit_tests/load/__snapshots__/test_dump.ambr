@@ -36,14 +36,6 @@
       "SpecialPerson"
     ],
     "kwargs": {
-      "secret": {
-        "lc": 1,
-        "type": "secret",
-        "id": [
-          "SECRET"
-        ]
-      },
-      "you_can_see_me": "hello",
       "another_secret": {
         "lc": 1,
         "type": "secret",
@@ -51,7 +43,15 @@
           "ANOTHER_SECRET"
         ]
       },
-      "another_visible": "bye"
+      "secret": {
+        "lc": 1,
+        "type": "secret",
+        "id": [
+          "SECRET"
+        ]
+      },
+      "another_visible": "bye",
+      "you_can_see_me": "hello"
     }
   }
   '''
@@ -71,61 +71,6 @@
       "LLMChain"
     ],
     "kwargs": {
-      "prompt": {
-        "lc": 1,
-        "type": "constructor",
-        "id": [
-          "langchain",
-          "prompts",
-          "prompt",
-          "PromptTemplate"
-        ],
-        "kwargs": {
-          "input_variables": [
-            "name"
-          ],
-          "template": "hello {name}!",
-          "template_format": "f-string"
-        },
-        "name": "PromptTemplate",
-        "graph": {
-          "nodes": [
-            {
-              "id": 0,
-              "type": "schema",
-              "data": "PromptInput"
-            },
-            {
-              "id": 1,
-              "type": "runnable",
-              "data": {
-                "id": [
-                  "langchain",
-                  "prompts",
-                  "prompt",
-                  "PromptTemplate"
-                ],
-                "name": "PromptTemplate"
-              }
-            },
-            {
-              "id": 2,
-              "type": "schema",
-              "data": "PromptTemplateOutput"
-            }
-          ],
-          "edges": [
-            {
-              "source": 0,
-              "target": 1
-            },
-            {
-              "source": 1,
-              "target": 2
-            }
-          ]
-        }
-      },
       "llm": {
         "lc": 1,
         "type": "constructor",
@@ -136,23 +81,15 @@
           "OpenAI"
         ],
         "kwargs": {
-          "model_name": "davinci",
+          "model": "davinci",
           "temperature": 0.5,
-          "max_tokens": 256,
-          "top_p": 1,
-          "n": 1,
-          "best_of": 1,
           "openai_api_key": {
             "lc": 1,
             "type": "secret",
             "id": [
               "OPENAI_API_KEY"
             ]
-          },
-          "openai_proxy": "",
-          "batch_size": 20,
-          "max_retries": 2,
-          "disallowed_special": "all"
+          }
         },
         "name": "OpenAI",
         "graph": {
@@ -193,24 +130,30 @@
           ]
         }
       },
-      "output_key": "text",
-      "output_parser": {
+      "prompt": {
         "lc": 1,
         "type": "constructor",
         "id": [
           "langchain",
-          "schema",
-          "output_parser",
-          "StrOutputParser"
+          "prompts",
+          "prompt",
+          "PromptTemplate"
         ],
-        "kwargs": {},
-        "name": "StrOutputParser",
+        "kwargs": {
+          "input_variables": [
+            "name"
+          ],
+          "template": "hello {name}!",
+          "template_format": "f-string",
+          "partial_variables": {}
+        },
+        "name": "PromptTemplate",
         "graph": {
           "nodes": [
             {
               "id": 0,
               "type": "schema",
-              "data": "StrOutputParserInput"
+              "data": "PromptInput"
             },
             {
               "id": 1,
@@ -218,17 +161,17 @@
               "data": {
                 "id": [
                   "langchain",
-                  "schema",
-                  "output_parser",
-                  "StrOutputParser"
+                  "prompts",
+                  "prompt",
+                  "PromptTemplate"
                 ],
-                "name": "StrOutputParser"
+                "name": "PromptTemplate"
               }
             },
             {
               "id": 2,
               "type": "schema",
-              "data": "StrOutputParserOutput"
+              "data": "PromptTemplateOutput"
             }
           ],
           "edges": [
@@ -242,8 +185,7 @@
             }
           ]
         }
-      },
-      "return_final_only": true
+      }
     },
     "name": "LLMChain",
     "graph": {
@@ -298,6 +240,65 @@
       "LLMChain"
     ],
     "kwargs": {
+      "llm": {
+        "lc": 1,
+        "type": "constructor",
+        "id": [
+          "langchain",
+          "chat_models",
+          "openai",
+          "ChatOpenAI"
+        ],
+        "kwargs": {
+          "model": "davinci",
+          "temperature": 0.5,
+          "openai_api_key": {
+            "lc": 1,
+            "type": "secret",
+            "id": [
+              "OPENAI_API_KEY"
+            ]
+          }
+        },
+        "name": "ChatOpenAI",
+        "graph": {
+          "nodes": [
+            {
+              "id": 0,
+              "type": "schema",
+              "data": "ChatOpenAIInput"
+            },
+            {
+              "id": 1,
+              "type": "runnable",
+              "data": {
+                "id": [
+                  "langchain",
+                  "chat_models",
+                  "openai",
+                  "ChatOpenAI"
+                ],
+                "name": "ChatOpenAI"
+              }
+            },
+            {
+              "id": 2,
+              "type": "schema",
+              "data": "ChatOpenAIOutput"
+            }
+          ],
+          "edges": [
+            {
+              "source": 0,
+              "target": 1
+            },
+            {
+              "source": 1,
+              "target": 2
+            }
+          ]
+        }
+      },
       "prompt": {
         "lc": 1,
         "type": "constructor",
@@ -336,7 +337,8 @@
                       "name"
                     ],
                     "template": "hello {name}!",
-                    "template_format": "f-string"
+                    "template_format": "f-string",
+                    "partial_variables": {}
                   },
                   "name": "PromptTemplate",
                   "graph": {
@@ -379,7 +381,8 @@
                 }
               }
             }
-          ]
+          ],
+          "partial_variables": {}
         },
         "name": "ChatPromptTemplate",
         "graph": {
@@ -419,120 +422,7 @@
             }
           ]
         }
-      },
-      "llm": {
-        "lc": 1,
-        "type": "constructor",
-        "id": [
-          "langchain",
-          "chat_models",
-          "openai",
-          "ChatOpenAI"
-        ],
-        "kwargs": {
-          "model_name": "davinci",
-          "temperature": 0.5,
-          "openai_api_key": {
-            "lc": 1,
-            "type": "secret",
-            "id": [
-              "OPENAI_API_KEY"
-            ]
-          },
-          "openai_proxy": "",
-          "max_retries": 2,
-          "n": 1
-        },
-        "name": "ChatOpenAI",
-        "graph": {
-          "nodes": [
-            {
-              "id": 0,
-              "type": "schema",
-              "data": "ChatOpenAIInput"
-            },
-            {
-              "id": 1,
-              "type": "runnable",
-              "data": {
-                "id": [
-                  "langchain",
-                  "chat_models",
-                  "openai",
-                  "ChatOpenAI"
-                ],
-                "name": "ChatOpenAI"
-              }
-            },
-            {
-              "id": 2,
-              "type": "schema",
-              "data": "ChatOpenAIOutput"
-            }
-          ],
-          "edges": [
-            {
-              "source": 0,
-              "target": 1
-            },
-            {
-              "source": 1,
-              "target": 2
-            }
-          ]
-        }
-      },
-      "output_key": "text",
-      "output_parser": {
-        "lc": 1,
-        "type": "constructor",
-        "id": [
-          "langchain",
-          "schema",
-          "output_parser",
-          "StrOutputParser"
-        ],
-        "kwargs": {},
-        "name": "StrOutputParser",
-        "graph": {
-          "nodes": [
-            {
-              "id": 0,
-              "type": "schema",
-              "data": "StrOutputParserInput"
-            },
-            {
-              "id": 1,
-              "type": "runnable",
-              "data": {
-                "id": [
-                  "langchain",
-                  "schema",
-                  "output_parser",
-                  "StrOutputParser"
-                ],
-                "name": "StrOutputParser"
-              }
-            },
-            {
-              "id": 2,
-              "type": "schema",
-              "data": "StrOutputParserOutput"
-            }
-          ],
-          "edges": [
-            {
-              "source": 0,
-              "target": 1
-            },
-            {
-              "source": 1,
-              "target": 2
-            }
-          ]
-        }
-      },
-      "return_final_only": true
+      }
     },
     "name": "LLMChain",
     "graph": {
@@ -587,61 +477,6 @@
       "LLMChain"
     ],
     "kwargs": {
-      "prompt": {
-        "lc": 1,
-        "type": "constructor",
-        "id": [
-          "langchain",
-          "prompts",
-          "prompt",
-          "PromptTemplate"
-        ],
-        "kwargs": {
-          "input_variables": [
-            "name"
-          ],
-          "template": "hello {name}!",
-          "template_format": "f-string"
-        },
-        "name": "PromptTemplate",
-        "graph": {
-          "nodes": [
-            {
-              "id": 0,
-              "type": "schema",
-              "data": "PromptInput"
-            },
-            {
-              "id": 1,
-              "type": "runnable",
-              "data": {
-                "id": [
-                  "langchain",
-                  "prompts",
-                  "prompt",
-                  "PromptTemplate"
-                ],
-                "name": "PromptTemplate"
-              }
-            },
-            {
-              "id": 2,
-              "type": "schema",
-              "data": "PromptTemplateOutput"
-            }
-          ],
-          "edges": [
-            {
-              "source": 0,
-              "target": 1
-            },
-            {
-              "source": 1,
-              "target": 2
-            }
-          ]
-        }
-      },
       "llm": {
         "lc": 1,
         "type": "constructor",
@@ -652,23 +487,15 @@
           "OpenAI"
         ],
         "kwargs": {
-          "model_name": "davinci",
+          "model": "davinci",
           "temperature": 0.5,
-          "max_tokens": 256,
-          "top_p": 1,
-          "n": 1,
-          "best_of": 1,
           "openai_api_key": {
             "lc": 1,
             "type": "secret",
             "id": [
               "OPENAI_API_KEY"
             ]
-          },
-          "openai_proxy": "",
-          "batch_size": 20,
-          "max_retries": 2,
-          "disallowed_special": "all"
+          }
         },
         "name": "OpenAI",
         "graph": {
@@ -709,24 +536,30 @@
           ]
         }
       },
-      "output_key": "text",
-      "output_parser": {
+      "prompt": {
         "lc": 1,
         "type": "constructor",
         "id": [
           "langchain",
-          "schema",
-          "output_parser",
-          "StrOutputParser"
+          "prompts",
+          "prompt",
+          "PromptTemplate"
         ],
-        "kwargs": {},
-        "name": "StrOutputParser",
+        "kwargs": {
+          "input_variables": [
+            "name"
+          ],
+          "template": "hello {name}!",
+          "template_format": "f-string",
+          "partial_variables": {}
+        },
+        "name": "PromptTemplate",
         "graph": {
           "nodes": [
             {
               "id": 0,
               "type": "schema",
-              "data": "StrOutputParserInput"
+              "data": "PromptInput"
             },
             {
               "id": 1,
@@ -734,17 +567,17 @@
               "data": {
                 "id": [
                   "langchain",
-                  "schema",
-                  "output_parser",
-                  "StrOutputParser"
+                  "prompts",
+                  "prompt",
+                  "PromptTemplate"
                 ],
-                "name": "StrOutputParser"
+                "name": "PromptTemplate"
               }
             },
             {
               "id": 2,
               "type": "schema",
-              "data": "StrOutputParserOutput"
+              "data": "PromptTemplateOutput"
             }
           ],
           "edges": [
@@ -758,8 +591,7 @@
             }
           ]
         }
-      },
-      "return_final_only": true
+      }
     },
     "name": "LLMChain",
     "graph": {
@@ -814,23 +646,15 @@
       "OpenAI"
     ],
     "kwargs": {
-      "model_name": "davinci",
+      "model": "davinci",
       "temperature": 0.7,
-      "max_tokens": 256,
-      "top_p": 1,
-      "n": 1,
-      "best_of": 1,
       "openai_api_key": {
         "lc": 1,
         "type": "secret",
         "id": [
           "OPENAI_API_KEY"
         ]
-      },
-      "openai_proxy": "",
-      "batch_size": 20,
-      "max_retries": 2,
-      "disallowed_special": "all"
+      }
     },
     "name": "OpenAI",
     "graph": {

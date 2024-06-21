@@ -7,7 +7,7 @@ KG_TRIPLE_DELIMITER = "<|>"
 
 
 class KnowledgeTriple(NamedTuple):
-    """Knowledge triple in the graph."""
+    """A triple in the graph."""
 
     subject: str
     predicate: str

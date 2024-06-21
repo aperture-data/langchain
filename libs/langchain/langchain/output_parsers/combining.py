@@ -6,7 +6,7 @@ from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.pydantic_v1 import root_validator
 
 
-class CombiningOutputParser(BaseOutputParser[Dict[str, Any]]):
+class CombiningOutputParser(BaseOutputParser):
     """Combine multiple output parsers into one."""
 
     parsers: List[BaseOutputParser]

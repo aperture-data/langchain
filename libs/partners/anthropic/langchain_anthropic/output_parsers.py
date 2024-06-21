@@ -1,20 +1,22 @@
-from typing import Any, List, Optional, Type
+from typing import Any, List, Optional, Type, TypedDict, cast
 
-from langchain_core.messages import ToolCall
+from langchain_core.messages import BaseMessage
 from langchain_core.output_parsers import BaseGenerationOutputParser
 from langchain_core.outputs import ChatGeneration, Generation
 from langchain_core.pydantic_v1 import BaseModel
 
 
-class ToolsOutputParser(BaseGenerationOutputParser):
-    """Output parser for tool calls."""
+class _ToolCall(TypedDict):
+    name: str
+    args: dict
+    id: str
+    index: int
 
+
+class ToolsOutputParser(BaseGenerationOutputParser):
     first_tool_only: bool = False
-    """Whether to return only the first tool call."""
     args_only: bool = False
-    """Whether to return only the arguments of the tool calls."""
     pydantic_schemas: Optional[List[Type[BaseModel]]] = None
-    """Pydantic schemas to parse tool calls into."""
 
     class Config:
         extra = "forbid"
@@ -31,19 +33,7 @@ class ToolsOutputParser(BaseGenerationOutputParser):
         """
         if not result or not isinstance(result[0], ChatGeneration):
             return None if self.first_tool_only else []
-        message = result[0].message
-        if isinstance(message.content, str):
-            tool_calls: List = []
-        else:
-            content: List = message.content
-            _tool_calls = [dict(tc) for tc in extract_tool_calls(content)]
-            # Map tool call id to index
-            id_to_index = {
-                block["id"]: i
-                for i, block in enumerate(content)
-                if block["type"] == "tool_use"
-            }
-            tool_calls = [{**tc, "index": id_to_index[tc["id"]]} for tc in _tool_calls]
+        tool_calls: List = _extract_tool_calls(result[0].message)
         if self.pydantic_schemas:
             tool_calls = [self._pydantic_parse(tc) for tc in tool_calls]
         elif self.args_only:
@@ -54,22 +44,23 @@ class ToolsOutputParser(BaseGenerationOutputParser):
         if self.first_tool_only:
             return tool_calls[0] if tool_calls else None
         else:
-            return [tool_call for tool_call in tool_calls]
+            return tool_calls
 
-    def _pydantic_parse(self, tool_call: dict) -> BaseModel:
+    def _pydantic_parse(self, tool_call: _ToolCall) -> BaseModel:
         cls_ = {schema.__name__: schema for schema in self.pydantic_schemas or []}[
             tool_call["name"]
         ]
         return cls_(**tool_call["args"])
 
 
-def extract_tool_calls(content: List[dict]) -> List[ToolCall]:
-    """Extract tool calls from a list of content blocks."""
+def _extract_tool_calls(msg: BaseMessage) -> List[_ToolCall]:
+    if isinstance(msg.content, str):
+        return []
     tool_calls = []
-    for block in content:
+    for i, block in enumerate(cast(List[dict], msg.content)):
         if block["type"] != "tool_use":
             continue
         tool_calls.append(
-            ToolCall(name=block["name"], args=block["input"], id=block["id"])
+            _ToolCall(name=block["name"], args=block["input"], id=block["id"], index=i)
         )
     return tool_calls

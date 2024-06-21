@@ -33,7 +33,7 @@ def test_chat_openai() -> None:
         default_query=None,
     )
     message = HumanMessage(content="Hello")
-    response = chat.invoke([message])
+    response = chat([message])
     assert isinstance(response, BaseMessage)
     assert isinstance(response.content, str)
 
@@ -42,7 +42,7 @@ def test_chat_openai_model() -> None:
     """Test ChatOpenAI wrapper handles model_name."""
     chat = ChatOpenAI(model="foo")
     assert chat.model_name == "foo"
-    chat = ChatOpenAI(model_name="bar")  # type: ignore[call-arg]
+    chat = ChatOpenAI(model_name="bar")
     assert chat.model_name == "bar"
 
 
@@ -51,7 +51,7 @@ def test_chat_openai_system_message() -> None:
     chat = ChatOpenAI(max_tokens=10)
     system_message = SystemMessage(content="You are to chat with the user.")
     human_message = HumanMessage(content="Hello")
-    response = chat.invoke([system_message, human_message])
+    response = chat([system_message, human_message])
     assert isinstance(response, BaseMessage)
     assert isinstance(response.content, str)
 
@@ -99,7 +99,7 @@ def test_chat_openai_streaming() -> None:
         verbose=True,
     )
     message = HumanMessage(content="Hello")
-    response = chat.invoke([message])
+    response = chat([message])
     assert callback_handler.llm_streams > 0
     assert isinstance(response, BaseMessage)
 
@@ -243,17 +243,17 @@ async def test_async_chat_openai_bind_functions() -> None:
 def test_chat_openai_extra_kwargs() -> None:
     """Test extra kwargs to chat openai."""
     # Check that foo is saved in extra_kwargs.
-    llm = ChatOpenAI(foo=3, max_tokens=10)  # type: ignore[call-arg]
+    llm = ChatOpenAI(foo=3, max_tokens=10)
     assert llm.max_tokens == 10
     assert llm.model_kwargs == {"foo": 3}
 
     # Test that if extra_kwargs are provided, they are added to it.
-    llm = ChatOpenAI(foo=3, model_kwargs={"bar": 2})  # type: ignore[call-arg]
+    llm = ChatOpenAI(foo=3, model_kwargs={"bar": 2})
     assert llm.model_kwargs == {"foo": 3, "bar": 2}
 
     # Test that if provided twice it errors
     with pytest.raises(ValueError):
-        ChatOpenAI(foo=3, model_kwargs={"foo": 2})  # type: ignore[call-arg]
+        ChatOpenAI(foo=3, model_kwargs={"foo": 2})
 
     # Test that if explicit param is specified in kwargs it errors
     with pytest.raises(ValueError):

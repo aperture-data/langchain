@@ -70,7 +70,7 @@ class TestDocumentDBVectorSearch:
 
         # insure the test collection is empty
         collection = prepare_collection()
-        assert collection.count_documents({}) == 0  # type: ignore[index]
+        assert collection.count_documents({}) == 0  # type: ignore[index]  # noqa: E501
 
     @classmethod
     def teardown_class(cls) -> None:

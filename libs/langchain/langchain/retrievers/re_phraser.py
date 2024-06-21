@@ -7,7 +7,6 @@ from langchain_core.callbacks import (
 )
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseLLM
-from langchain_core.prompts import BasePromptTemplate
 from langchain_core.prompts.prompt import PromptTemplate
 from langchain_core.retrievers import BaseRetriever
 
@@ -37,7 +36,7 @@ class RePhraseQueryRetriever(BaseRetriever):
         cls,
         retriever: BaseRetriever,
         llm: BaseLLM,
-        prompt: BasePromptTemplate = DEFAULT_QUERY_PROMPT,
+        prompt: PromptTemplate = DEFAULT_QUERY_PROMPT,
     ) -> "RePhraseQueryRetriever":
         """Initialize from llm using default template.
 
@@ -75,8 +74,8 @@ class RePhraseQueryRetriever(BaseRetriever):
         response = self.llm_chain(query, callbacks=run_manager.get_child())
         re_phrased_question = response["text"]
         logger.info(f"Re-phrased question: {re_phrased_question}")
-        docs = self.retriever.invoke(
-            re_phrased_question, config={"callbacks": run_manager.get_child()}
+        docs = self.retriever.get_relevant_documents(
+            re_phrased_question, callbacks=run_manager.get_child()
         )
         return docs
 

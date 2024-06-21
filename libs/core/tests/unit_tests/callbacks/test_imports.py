@@ -30,7 +30,6 @@ EXPECTED_ALL = [
     "AsyncCallbackManagerForChainGroup",
     "StdOutCallbackHandler",
     "StreamingStdOutCallbackHandler",
-    "FileCallbackHandler",
 ]
 
 

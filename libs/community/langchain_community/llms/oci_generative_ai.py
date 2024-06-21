@@ -128,7 +128,7 @@ class OCIGenAIBase(BaseModel, ABC):
             )
 
         except ImportError as ex:
-            raise ImportError(
+            raise ModuleNotFoundError(
                 "Could not import oci python package. "
                 "Please make sure you have the oci package installed."
             ) from ex

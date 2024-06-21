@@ -13,7 +13,9 @@ from langchain_community.tools.connery.models import Action, Parameter
 
 
 class ConneryAction(BaseTool):
-    """Connery Action tool."""
+    """
+    A LangChain Tool wrapping a Connery Action.
+    """
 
     name: str
     description: str

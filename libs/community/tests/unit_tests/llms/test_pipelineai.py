@@ -5,14 +5,14 @@ from langchain_community.llms.pipelineai import PipelineAI
 
 
 def test_api_key_is_string() -> None:
-    llm = PipelineAI(pipeline_api_key="secret-api-key")  # type: ignore[arg-type]
+    llm = PipelineAI(pipeline_api_key="secret-api-key")
     assert isinstance(llm.pipeline_api_key, SecretStr)
 
 
 def test_api_key_masked_when_passed_via_constructor(
     capsys: CaptureFixture,
 ) -> None:
-    llm = PipelineAI(pipeline_api_key="secret-api-key")  # type: ignore[arg-type]
+    llm = PipelineAI(pipeline_api_key="secret-api-key")
     print(llm.pipeline_api_key, end="")  # noqa: T201
     captured = capsys.readouterr()
 

@@ -50,7 +50,7 @@ def riva_tts_stub_init_patch(
 @pytest.fixture
 def tts() -> RivaTTS:
     """Initialize a copy of the runnable."""
-    return RivaTTS(**CONFIG)  # type: ignore[arg-type]
+    return RivaTTS(**CONFIG)
 
 
 @pytest.mark.requires("riva.client")
@@ -63,7 +63,7 @@ def test_init(tts: RivaTTS) -> None:
 @pytest.mark.requires("riva.client")
 def test_init_defaults() -> None:
     """Ensure the runnable can be loaded with no arguments."""
-    _ = RivaTTS()  # type: ignore[call-arg]
+    _ = RivaTTS()
 
 
 @pytest.mark.requires("riva.client")

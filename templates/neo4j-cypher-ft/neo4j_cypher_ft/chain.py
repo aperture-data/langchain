@@ -1,21 +1,13 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from langchain.chains.graph_qa.cypher_utils import CypherQueryCorrector, Schema
+from langchain.chains.openai_functions import create_structured_output_chain
+from langchain_community.chat_models import ChatOpenAI
 from langchain_community.graphs import Neo4jGraph
-from langchain_core.messages import (
-    AIMessage,
-    SystemMessage,
-    ToolMessage,
-)
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    MessagesPlaceholder,
-)
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import RunnablePassthrough
-from langchain_openai import ChatOpenAI
 
 # Connection to Neo4j
 graph = Neo4jGraph()
@@ -28,8 +20,8 @@ corrector_schema = [
 cypher_validation = CypherQueryCorrector(corrector_schema)
 
 # LLMs
-cypher_llm = ChatOpenAI(model="gpt-4", temperature=0.0)
-qa_llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0.0)
+cypher_llm = ChatOpenAI(model_name="gpt-4", temperature=0.0)
+qa_llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.0)
 
 
 # Extract entities from text
@@ -74,7 +66,7 @@ def map_to_database(entities: Entities) -> Optional[str]:
     return result
 
 
-entity_chain = prompt | qa_llm.with_structured_output(Entities)
+entity_chain = create_structured_output_chain(Entities, qa_llm, prompt)
 
 # Generate Cypher statement based on natural language input
 cypher_template = """Based on the Neo4j graph schema below, write a Cypher query that would answer the user's question:
@@ -97,7 +89,7 @@ cypher_prompt = ChatPromptTemplate.from_messages(
 cypher_response = (
     RunnablePassthrough.assign(names=entity_chain)
     | RunnablePassthrough.assign(
-        entities_list=lambda x: map_to_database(x["names"]),
+        entities_list=lambda x: map_to_database(x["names"]["function"]),
         schema=lambda _: graph.get_schema,
     )
     | cypher_prompt
@@ -106,51 +98,26 @@ cypher_response = (
 )
 
 # Generate natural language response based on database results
-response_system = """You are an assistant that helps to form nice and human 
-understandable answers based on the provided information from tools.
-Do not add any other information that wasn't present in the tools, and use 
-very concise style in interpreting results!
-"""
+response_template = """Based on the the question, Cypher query, and Cypher response, write a natural language response:
+Question: {question}
+Cypher query: {query}
+Cypher Response: {response}"""  # noqa: E501
 
 response_prompt = ChatPromptTemplate.from_messages(
     [
-        SystemMessage(content=response_system),
-        HumanMessagePromptTemplate.from_template("{question}"),
-        MessagesPlaceholder(variable_name="function_response"),
+        (
+            "system",
+            "Given an input question and Cypher response, convert it to a natural"
+            " language answer. No pre-amble.",
+        ),
+        ("human", response_template),
     ]
 )
-
-
-def get_function_response(
-    query: str, question: str
-) -> List[Union[AIMessage, ToolMessage]]:
-    context = graph.query(cypher_validation(query))
-    TOOL_ID = "call_H7fABDuzEau48T10Qn0Lsh0D"
-    messages = [
-        AIMessage(
-            content="",
-            additional_kwargs={
-                "tool_calls": [
-                    {
-                        "id": TOOL_ID,
-                        "function": {
-                            "arguments": '{"question":"' + question + '"}',
-                            "name": "GetInformation",
-                        },
-                        "type": "function",
-                    }
-                ]
-            },
-        ),
-        ToolMessage(content=str(context), tool_call_id=TOOL_ID),
-    ]
-    return messages
-
 
 chain = (
     RunnablePassthrough.assign(query=cypher_response)
     | RunnablePassthrough.assign(
-        function_response=lambda x: get_function_response(x["query"], x["question"])
+        response=lambda x: graph.query(cypher_validation(x["query"])),
     )
     | response_prompt
     | qa_llm

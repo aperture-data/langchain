@@ -19,11 +19,6 @@ from typing import (
 )
 
 from langchain_core.agents import AgentAction
-from langchain_core.callbacks.manager import (
-    AsyncCallbackManagerForChainRun,
-    CallbackManagerForChainRun,
-    Callbacks,
-)
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.language_models.chat_models import BaseChatModel
@@ -31,6 +26,11 @@ from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.pydantic_v1 import Extra, Field
 from langchain_core.tools import BaseTool
 
+from langchain.callbacks.manager import (
+    AsyncCallbackManagerForChainRun,
+    CallbackManagerForChainRun,
+    Callbacks,
+)
 from langchain.chains.llm import LLMChain
 from langchain.evaluation.agents.trajectory_eval_prompt import (
     EVAL_CHAT_PROMPT,
@@ -103,8 +103,6 @@ class TrajectoryEvalChain(AgentTrajectoryEvaluator, LLMEvalChain):
 
     This chain is used to evaluate ReAct style agents by reasoning about
     the sequence of actions taken and their outcomes.
-    Based on the paper "ReAct: Synergizing Reasoning and Acting in Language Models"
-    (https://arxiv.org/abs/2210.03629)
 
     Example:
 
@@ -143,7 +141,7 @@ class TrajectoryEvalChain(AgentTrajectoryEvaluator, LLMEvalChain):
         )
         print(result["score"])  # noqa: T201
         # 0
-    """
+    """  # noqa: E501
 
     agent_tools: Optional[List[BaseTool]] = None
     """A list of tools available to the agent."""

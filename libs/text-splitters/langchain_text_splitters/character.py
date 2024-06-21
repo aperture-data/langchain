@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, List, Optional
 
 from langchain_text_splitters.base import Language, TextSplitter
 
@@ -29,25 +29,17 @@ class CharacterTextSplitter(TextSplitter):
 
 
 def _split_text_with_regex(
-    text: str, separator: str, keep_separator: Union[bool, Literal["start", "end"]]
+    text: str, separator: str, keep_separator: bool
 ) -> List[str]:
     # Now that we have the separator, split the text
     if separator:
         if keep_separator:
             # The parentheses in the pattern keep the delimiters in the result.
             _splits = re.split(f"({separator})", text)
-            splits = (
-                ([_splits[i] + _splits[i + 1] for i in range(0, len(_splits) - 1, 2)])
-                if keep_separator == "end"
-                else ([_splits[i] + _splits[i + 1] for i in range(1, len(_splits), 2)])
-            )
+            splits = [_splits[i] + _splits[i + 1] for i in range(1, len(_splits), 2)]
             if len(_splits) % 2 == 0:
                 splits += _splits[-1:]
-            splits = (
-                (splits + [_splits[-1]])
-                if keep_separator == "end"
-                else ([_splits[0]] + splits)
-            )
+            splits = [_splits[0]] + splits
         else:
             splits = re.split(separator, text)
     else:
@@ -343,30 +335,6 @@ class RecursiveCharacterTextSplitter(TextSplitter):
                 " ",
                 "",
             ]
-        elif language == Language.ELIXIR:
-            return [
-                # Split along method function and module definiton
-                "\ndef ",
-                "\ndefp ",
-                "\ndefmodule ",
-                "\ndefprotocol ",
-                "\ndefmacro ",
-                "\ndefmacrop ",
-                # Split along control flow statements
-                "\nif ",
-                "\nunless ",
-                "\nwhile ",
-                "\ncase ",
-                "\ncond ",
-                "\nwith ",
-                "\nfor ",
-                "\ndo ",
-                # Split by the normal type of lines
-                "\n\n",
-                "\n",
-                " ",
-                "",
-            ]
         elif language == Language.RUST:
             return [
                 # Split along function definitions
@@ -603,23 +571,6 @@ class RecursiveCharacterTextSplitter(TextSplitter):
                 " ",
                 "",
             ]
-        elif language == Language.LUA:
-            return [
-                # Split along variable and table definitions
-                "\nlocal ",
-                # Split along function definitions
-                "\nfunction ",
-                # Split along control flow statements
-                "\nif ",
-                "\nfor ",
-                "\nwhile ",
-                "\nrepeat ",
-                # Split by the normal type of lines
-                "\n\n",
-                "\n",
-                " ",
-                "",
-            ]
         elif language == Language.HASKELL:
             return [
                 # Split along function definitions
@@ -659,8 +610,6 @@ class RecursiveCharacterTextSplitter(TextSplitter):
                 " ",
                 "",
             ]
-        elif language in Language._value2member_map_:
-            raise ValueError(f"Language {language} is not implemented yet!")
         else:
             raise ValueError(
                 f"Language {language} is not supported! "

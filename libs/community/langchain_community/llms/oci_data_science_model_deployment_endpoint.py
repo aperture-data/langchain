@@ -240,7 +240,7 @@ class OCIModelDeploymentTGI(OCIModelDeploymentLLM):
     sampling and Top-p sampling.
     """
 
-    watermark: bool = True
+    watermark = True
     """Watermarking with `A Watermark for Large Language Models <https://arxiv.org/abs/2301.10226>`_.
     Defaults to True."""
 

@@ -1,5 +1,4 @@
 """Generic utility functions."""
-
 import contextlib
 import datetime
 import functools
@@ -85,15 +84,14 @@ def mock_now(dt_value):  # type: ignore
 def guard_import(
     module_name: str, *, pip_name: Optional[str] = None, package: Optional[str] = None
 ) -> Any:
-    """Dynamically import a module and raise an exception if the module is not
+    """Dynamically imports a module and raises a helpful exception if the module is not
     installed."""
     try:
         module = importlib.import_module(module_name, package)
-    except (ImportError, ModuleNotFoundError):
-        pip_name = pip_name or module_name.split(".")[0].replace("_", "-")
+    except ImportError:
         raise ImportError(
             f"Could not import {module_name} python package. "
-            f"Please install it with `pip install {pip_name}`."
+            f"Please install it with `pip install {pip_name or module_name}`."
         )
     return module
 

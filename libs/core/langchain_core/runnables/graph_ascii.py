@@ -3,9 +3,7 @@ Adapted from https://github.com/iterative/dvc/blob/main/dvc/dagascii.py"""
 
 import math
 import os
-from typing import Any, Mapping, Sequence
-
-from langchain_core.runnables.graph import Edge as LangEdge
+from typing import Any, Mapping, Sequence, Tuple
 
 
 class VertexViewer:
@@ -158,7 +156,7 @@ class AsciiCanvas:
 
 
 def _build_sugiyama_layout(
-    vertices: Mapping[str, str], edges: Sequence[LangEdge]
+    vertices: Mapping[str, str], edges: Sequence[Tuple[str, str]]
 ) -> Any:
     try:
         from grandalf.graphs import Edge, Graph, Vertex  # type: ignore[import]
@@ -183,7 +181,7 @@ def _build_sugiyama_layout(
     #
 
     vertices_ = {id: Vertex(f" {data} ") for id, data in vertices.items()}
-    edges_ = [Edge(vertices_[s], vertices_[e], data=cond) for s, e, _, cond in edges]
+    edges_ = [Edge(vertices_[s], vertices_[e]) for s, e in edges]
     vertices_list = vertices_.values()
     graph = Graph(vertices_list, edges_)
 
@@ -211,7 +209,7 @@ def _build_sugiyama_layout(
     return sug
 
 
-def draw_ascii(vertices: Mapping[str, str], edges: Sequence[LangEdge]) -> str:
+def draw_ascii(vertices: Mapping[str, str], edges: Sequence[Tuple[str, str]]) -> str:
     """Build a DAG and draw it in ASCII.
 
     Args:
@@ -222,6 +220,7 @@ def draw_ascii(vertices: Mapping[str, str], edges: Sequence[LangEdge]) -> str:
         str: ASCII representation
 
     Example:
+        >>> from dvc.dagascii import draw
         >>> vertices = [1, 2, 3, 4]
         >>> edges = [(1, 2), (2, 3), (2, 4), (1, 4)]
         >>> print(draw(vertices, edges))
@@ -244,8 +243,8 @@ def draw_ascii(vertices: Mapping[str, str], edges: Sequence[LangEdge]) -> str:
 
     # NOTE: coordinates might me negative, so we need to shift
     # everything to the positive plane before we actually draw it.
-    Xs = []
-    Ys = []
+    Xs = []  # noqa: N806
+    Ys = []  # noqa: N806
 
     sug = _build_sugiyama_layout(vertices, edges)
 
@@ -288,7 +287,7 @@ def draw_ascii(vertices: Mapping[str, str], edges: Sequence[LangEdge]) -> str:
             assert end_x >= 0
             assert end_y >= 0
 
-            canvas.line(start_x, start_y, end_x, end_y, "." if edge.data else "*")
+            canvas.line(start_x, start_y, end_x, end_y, "*")
 
     for vertex in sug.g.sV:
         # NOTE: moving boxes w/2 to the left

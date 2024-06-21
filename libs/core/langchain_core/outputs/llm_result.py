@@ -9,38 +9,13 @@ from langchain_core.pydantic_v1 import BaseModel
 
 
 class LLMResult(BaseModel):
-    """A container for results of an LLM call.
-
-    Both chat models and LLMs generate an LLMResult object. This object contains
-    the generated outputs and any additional information that the model provider
-    wants to return.
-    """
+    """Class that contains all results for a batched LLM call."""
 
     generations: List[List[Generation]]
-    """Generated outputs.
-    
-    The first dimension of the list represents completions for different input
-    prompts.
-    
-    The second dimension of the list represents different candidate generations
-    for a given prompt.
-    
-    When returned from an LLM the type is List[List[Generation]].
-    When returned from a chat model the type is List[List[ChatGeneration]].
-    
-    ChatGeneration is a subclass of Generation that has a field for a structured
-    chat message.
-    """
+    """List of generated outputs. This is a List[List[]] because
+    each input could have multiple candidate generations."""
     llm_output: Optional[dict] = None
-    """For arbitrary LLM provider specific output.
-    
-    This dictionary is a free-form dictionary that can contain any information that the
-    provider wants to return. It is not standardized and is provider-specific.
-    
-    Users should generally avoid relying on this field and instead rely on
-    accessing relevant information from standardized fields present in
-    AIMessage.
-    """
+    """Arbitrary LLM provider-specific output."""
     run: Optional[List[RunInfo]] = None
     """List of metadata info for model call for each input."""
 

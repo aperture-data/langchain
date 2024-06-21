@@ -1,4 +1,5 @@
 from langchain import embeddings
+from tests.unit_tests import assert_all_importable
 
 EXPECTED_ALL = [
     "OpenAIEmbeddings",
@@ -43,7 +44,6 @@ EXPECTED_ALL = [
     "SpacyEmbeddings",
     "NLPCloudEmbeddings",
     "GPT4AllEmbeddings",
-    "OpenVINOEmbeddings",
     "XinferenceEmbeddings",
     "LocalAIEmbeddings",
     "AwaEmbeddings",
@@ -60,3 +60,4 @@ EXPECTED_ALL = [
 
 def test_all_imports() -> None:
     assert set(embeddings.__all__) == set(EXPECTED_ALL)
+    assert_all_importable(embeddings)

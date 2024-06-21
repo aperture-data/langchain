@@ -43,7 +43,7 @@ Question: ```{question}```
 
 
 def test_opaqueprompts() -> None:
-    chain = PromptTemplate.from_template(prompt_template) | OpaquePrompts(llm=OpenAI())  # type: ignore[call-arg]
+    chain = PromptTemplate.from_template(prompt_template) | OpaquePrompts(llm=OpenAI())
     output = chain.invoke(
         {
             "question": "Write a text message to remind John to do password reset \

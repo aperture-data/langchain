@@ -175,10 +175,6 @@ class DocumentDBVectorSearch(VectorStore):
                 The maximum number of supported dimensions is 2000
 
             similarity: Similarity algorithm to use with the HNSW index.
-                 Possible options are:
-                    - DocumentDBSimilarityType.COS (cosine distance),
-                    - DocumentDBSimilarityType.EUC (Euclidean distance), and
-                    - DocumentDBSimilarityType.DOT (dot product).
 
             m: Specifies the max number of connections for an HNSW index.
                 Large impact on memory consumption.
@@ -187,6 +183,10 @@ class DocumentDBVectorSearch(VectorStore):
                 for constructing the graph for HNSW index. Higher values lead
                 to more accurate results but slower indexing speed.
 
+                Possible options are:
+                    - DocumentDBSimilarityType.COS (cosine distance),
+                    - DocumentDBSimilarityType.EUC (Euclidean distance), and
+                    - DocumentDBSimilarityType.DOT (dot product).
 
         Returns:
             An object describing the created index
@@ -309,11 +309,7 @@ class DocumentDBVectorSearch(VectorStore):
         self._collection.delete_one({"_id": ObjectId(document_id)})
 
     def _similarity_search_without_score(
-        self,
-        embeddings: List[float],
-        k: int = 4,
-        ef_search: int = 40,
-        filter: Optional[Dict[str, Any]] = None,
+        self, embeddings: List[float], k: int = 4, ef_search: int = 40
     ) -> List[Document]:
         """Returns a list of documents.
 
@@ -323,12 +319,11 @@ class DocumentDBVectorSearch(VectorStore):
             ef_search: Specifies the size of the dynamic candidate list
                 that HNSW index uses during search. A higher value of
                 efSearch provides better recall at cost of speed.
-            filter (Optional[Dict[str, str]]): Filter by metadata. Defaults to None.
+
         Returns:
             A list of documents closest to the query vector
         """
         pipeline: List[dict[str, Any]] = [
-            {"$match": filter},
             {
                 "$search": {
                     "vectorSearch": {
@@ -338,8 +333,8 @@ class DocumentDBVectorSearch(VectorStore):
                         "k": k,
                         "efSearch": ef_search,
                     }
-                },
-            },
+                }
+            }
         ]
 
         cursor = self._collection.aggregate(pipeline)
@@ -357,12 +352,10 @@ class DocumentDBVectorSearch(VectorStore):
         query: str,
         k: int = 4,
         ef_search: int = 40,
-        *,
-        filter: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> List[Document]:
         embeddings = self._embedding.embed_query(query)
         docs = self._similarity_search_without_score(
-            embeddings=embeddings, k=k, ef_search=ef_search, filter=filter
+            embeddings=embeddings, k=k, ef_search=ef_search
         )
         return [doc for doc in docs]

@@ -282,6 +282,6 @@ class AlephAlpha(LLM):
 
 
 if __name__ == "__main__":
-    aa = AlephAlpha()  # type: ignore[call-arg]
+    aa = AlephAlpha()
 
-    print(aa.invoke("How are you?"))  # noqa: T201
+    print(aa("How are you?"))  # noqa: T201

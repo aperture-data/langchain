@@ -22,16 +22,16 @@ class EdenAiParsingIDTool(EdenaiTool):
 
     """
 
-    name: str = "edenai_identity_parsing"
+    name = "edenai_identity_parsing"
 
-    description: str = (
+    description = (
         "A wrapper around edenai Services Identity parsing. "
         "Useful for when you have to extract information from an ID Document "
         "Input should be the string url of the document to parse."
     )
 
-    feature: str = "ocr"
-    subfeature: str = "identity_parser"
+    feature = "ocr"
+    subfeature = "identity_parser"
 
     language: Optional[str] = None
     """

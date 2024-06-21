@@ -97,7 +97,7 @@ class CTransformers(LLM):
         Example:
             .. code-block:: python
 
-                response = llm.invoke("Tell me a joke.")
+                response = llm("Tell me a joke.")
         """
         text = []
         _run_manager = run_manager or CallbackManagerForLLMRun.get_noop_manager()
@@ -125,7 +125,7 @@ class CTransformers(LLM):
 
         Example:
             .. code-block:: python
-                response = llm.invoke("Once upon a time, ")
+                response = llm("Once upon a time, ")
         """
         text_callback = None
         if run_manager:

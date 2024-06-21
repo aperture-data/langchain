@@ -55,7 +55,7 @@ retriever = vector_store.as_retriever()
 
 
 def get_tools(query: str) -> List[Tool]:
-    docs = retriever.invoke(query)
+    docs = retriever.get_relevant_documents(query)
     return [ALL_TOOLS[d.metadata["index"]] for d in docs]
 
 

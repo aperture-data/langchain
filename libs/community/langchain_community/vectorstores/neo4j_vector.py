@@ -20,7 +20,6 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.utils import get_from_dict_or_env
 from langchain_core.vectorstores import VectorStore
 
-from langchain_community.graphs import Neo4jGraph
 from langchain_community.vectorstores.utils import DistanceStrategy
 
 DEFAULT_DISTANCE_STRATEGY = DistanceStrategy.COSINE
@@ -69,50 +68,31 @@ class SearchType(str, enum.Enum):
 DEFAULT_SEARCH_TYPE = SearchType.VECTOR
 
 
-class IndexType(str, enum.Enum):
-    """Enumerator of the index types."""
-
-    NODE = "NODE"
-    RELATIONSHIP = "RELATIONSHIP"
-
-
-DEFAULT_INDEX_TYPE = IndexType.NODE
-
-
-def _get_search_index_query(
-    search_type: SearchType, index_type: IndexType = DEFAULT_INDEX_TYPE
-) -> str:
-    if index_type == IndexType.NODE:
-        type_to_query_map = {
-            SearchType.VECTOR: (
-                "CALL db.index.vector.queryNodes($index, $k, $embedding) "
-                "YIELD node, score "
-            ),
-            SearchType.HYBRID: (
-                "CALL { "
-                "CALL db.index.vector.queryNodes($index, $k, $embedding) "
-                "YIELD node, score "
-                "WITH collect({node:node, score:score}) AS nodes, max(score) AS max "
-                "UNWIND nodes AS n "
-                # We use 0 as min
-                "RETURN n.node AS node, (n.score / max) AS score UNION "
-                "CALL db.index.fulltext.queryNodes($keyword_index, $query, "
-                "{limit: $k}) YIELD node, score "
-                "WITH collect({node:node, score:score}) AS nodes, max(score) AS max "
-                "UNWIND nodes AS n "
-                # We use 0 as min
-                "RETURN n.node AS node, (n.score / max) AS score "
-                "} "
-                # dedup
-                "WITH node, max(score) AS score ORDER BY score DESC LIMIT $k "
-            ),
-        }
-        return type_to_query_map[search_type]
-    else:
-        return (
-            "CALL db.index.vector.queryRelationships($index, $k, $embedding) "
-            "YIELD relationship, score "
-        )
+def _get_search_index_query(search_type: SearchType) -> str:
+    type_to_query_map = {
+        SearchType.VECTOR: (
+            "CALL db.index.vector.queryNodes($index, $k, $embedding) YIELD node, score "
+        ),
+        SearchType.HYBRID: (
+            "CALL { "
+            "CALL db.index.vector.queryNodes($index, $k, $embedding) "
+            "YIELD node, score "
+            "WITH collect({node:node, score:score}) AS nodes, max(score) AS max "
+            "UNWIND nodes AS n "
+            # We use 0 as min
+            "RETURN n.node AS node, (n.score / max) AS score UNION "
+            "CALL db.index.fulltext.queryNodes($keyword_index, $query, {limit: $k}) "
+            "YIELD node, score "
+            "WITH collect({node:node, score:score}) AS nodes, max(score) AS max "
+            "UNWIND nodes AS n "
+            # We use 0 as min
+            "RETURN n.node AS node, (n.score / max) AS score "
+            "} "
+            # dedup
+            "WITH node, max(score) AS score ORDER BY score DESC LIMIT $k "
+        ),
+    }
+    return type_to_query_map[search_type]
 
 
 def check_if_not_null(props: List[str], values: List[Any]) -> None:
@@ -159,7 +139,7 @@ def remove_lucene_chars(text: str) -> str:
 
 def dict_to_yaml_str(input_dict: Dict, indent: int = 0) -> str:
     """
-    Convert a dictionary to a YAML-like string without using external libraries.
+    Converts a dictionary to a YAML-like string without using external libraries.
 
     Parameters:
     - input_dict (dict): The dictionary to convert.
@@ -185,8 +165,6 @@ def dict_to_yaml_str(input_dict: Dict, indent: int = 0) -> str:
 def combine_queries(
     input_queries: List[Tuple[str, Dict[str, Any]]], operator: str
 ) -> Tuple[str, Dict[str, Any]]:
-    """Combine multiple queries with an operator."""
-
     # Initialize variables to hold the combined query and parameters
     combined_query: str = ""
     combined_params: Dict = {}
@@ -219,7 +197,8 @@ def combine_queries(
 def collect_params(
     input_data: List[Tuple[str, Dict[str, str]]],
 ) -> Tuple[List[str], Dict[str, Any]]:
-    """Transform the input data into the desired format.
+    """
+    Transform the input data into the desired format.
 
     Args:
     - input_data (list of tuples): Input data to transform.
@@ -345,15 +324,6 @@ def _handle_field_filter(
 
 
 def construct_metadata_filter(filter: Dict[str, Any]) -> Tuple[str, Dict]:
-    """Construct a metadata filter.
-
-    Args:
-        filter: A dictionary representing the filter condition.
-
-    Returns:
-        Tuple[str, Dict]
-    """
-
     if isinstance(filter, dict):
         if len(filter) == 1:
             # The only operators allowed at the top level are $AND and $OR
@@ -483,8 +453,6 @@ class Neo4jVector(VectorStore):
         pre_delete_collection: bool = False,
         retrieval_query: str = "",
         relevance_score_fn: Optional[Callable[[float], float]] = None,
-        index_type: IndexType = DEFAULT_INDEX_TYPE,
-        graph: Optional[Neo4jGraph] = None,
     ) -> None:
         try:
             import neo4j
@@ -503,44 +471,40 @@ class Neo4jVector(VectorStore):
                 "distance_strategy must be either 'EUCLIDEAN_DISTANCE' or 'COSINE'"
             )
 
-        # Graph object takes precedent over env or input params
-        if graph:
-            self._driver = graph._driver
-            self._database = graph._database
-        else:
-            # Handle if the credentials are environment variables
-            # Support URL for backwards compatibility
-            if not url:
-                url = os.environ.get("NEO4J_URL")
+        # Handle if the credentials are environment variables
 
-            url = get_from_dict_or_env({"url": url}, "url", "NEO4J_URI")
-            username = get_from_dict_or_env(
-                {"username": username}, "username", "NEO4J_USERNAME"
-            )
-            password = get_from_dict_or_env(
-                {"password": password}, "password", "NEO4J_PASSWORD"
-            )
-            database = get_from_dict_or_env(
-                {"database": database}, "database", "NEO4J_DATABASE", "neo4j"
-            )
+        # Support URL for backwards compatibility
+        if not url:
+            url = os.environ.get("NEO4J_URL")
 
-            self._driver = neo4j.GraphDatabase.driver(url, auth=(username, password))
-            self._database = database
-            # Verify connection
-            try:
-                self._driver.verify_connectivity()
-            except neo4j.exceptions.ServiceUnavailable:
-                raise ValueError(
-                    "Could not connect to Neo4j database. "
-                    "Please ensure that the url is correct"
-                )
-            except neo4j.exceptions.AuthError:
-                raise ValueError(
-                    "Could not connect to Neo4j database. "
-                    "Please ensure that the username and password are correct"
-                )
+        url = get_from_dict_or_env({"url": url}, "url", "NEO4J_URI")
+        username = get_from_dict_or_env(
+            {"username": username}, "username", "NEO4J_USERNAME"
+        )
+        password = get_from_dict_or_env(
+            {"password": password}, "password", "NEO4J_PASSWORD"
+        )
+        database = get_from_dict_or_env(
+            {"database": database}, "database", "NEO4J_DATABASE", "neo4j"
+        )
 
+        self._driver = neo4j.GraphDatabase.driver(url, auth=(username, password))
+        self._database = database
         self.schema = ""
+        # Verify connection
+        try:
+            self._driver.verify_connectivity()
+        except neo4j.exceptions.ServiceUnavailable:
+            raise ValueError(
+                "Could not connect to Neo4j database. "
+                "Please ensure that the url is correct"
+            )
+        except neo4j.exceptions.AuthError:
+            raise ValueError(
+                "Could not connect to Neo4j database. "
+                "Please ensure that the username and password are correct"
+            )
+
         # Verify if the version support vector index
         self._is_enterprise = False
         self.verify_version()
@@ -567,7 +531,6 @@ class Neo4jVector(VectorStore):
         self.override_relevance_score_fn = relevance_score_fn
         self.retrieval_query = retrieval_query
         self.search_type = search_type
-        self._index_type = index_type
         # Calculate embedding dimension
         self.embedding_dimension = len(embedding.embed_query("foo"))
 
@@ -642,7 +605,7 @@ class Neo4jVector(VectorStore):
         # Flag for enterprise
         self._is_enterprise = True if db_data[0]["edition"] == "enterprise" else False
 
-    def retrieve_existing_index(self) -> Tuple[Optional[int], Optional[str]]:
+    def retrieve_existing_index(self) -> Optional[int]:
         """
         Check if the vector index exists in the Neo4j database
         and returns its embedding dimension.
@@ -657,11 +620,11 @@ class Neo4jVector(VectorStore):
         """
 
         index_information = self.query(
-            "SHOW INDEXES YIELD name, type, entityType, labelsOrTypes, "
-            "properties, options WHERE type = 'VECTOR' AND (name = $index_name "
+            "SHOW INDEXES YIELD name, type, labelsOrTypes, properties, options "
+            "WHERE type = 'VECTOR' AND (name = $index_name "
             "OR (labelsOrTypes[0] = $node_label AND "
             "properties[0] = $embedding_node_property)) "
-            "RETURN name, entityType, labelsOrTypes, properties, options ",
+            "RETURN name, labelsOrTypes, properties, options ",
             params={
                 "index_name": self.index_name,
                 "node_label": self.node_label,
@@ -674,14 +637,13 @@ class Neo4jVector(VectorStore):
             self.index_name = index_information[0]["name"]
             self.node_label = index_information[0]["labelsOrTypes"][0]
             self.embedding_node_property = index_information[0]["properties"][0]
-            self._index_type = index_information[0]["entityType"]
             embedding_dimension = index_information[0]["options"]["indexConfig"][
                 "vector.dimensions"
             ]
 
-            return embedding_dimension, index_information[0]["entityType"]
+            return embedding_dimension
         except IndexError:
-            return None, None
+            return None
 
     def retrieve_existing_fts_index(
         self, text_node_properties: List[str] = []
@@ -782,13 +744,7 @@ class Neo4jVector(VectorStore):
             **kwargs,
         )
         # Check if the vector index already exists
-        embedding_dimension, index_type = store.retrieve_existing_index()
-
-        # Raise error if relationship index type
-        if index_type == "RELATIONSHIP":
-            raise ValueError(
-                "Data ingestion is not supported with relationship vector index."
-            )
+        embedding_dimension = store.retrieve_existing_index()
 
         # If the vector index doesn't exist yet
         if not embedding_dimension:
@@ -990,17 +946,8 @@ class Neo4jVector(VectorStore):
                     "Metadata filtering can't be use in combination with "
                     "a hybrid search approach"
                 )
-            parallel_query = (
-                "CYPHER runtime = parallel parallelRuntimeSupport=all "
-                if self._is_enterprise
-                else ""
-            )
-            base_index_query = parallel_query + (
-                f"MATCH (n:`{self.node_label}`) WHERE "
-                f"n.`{self.embedding_node_property}` IS NOT NULL AND "
-                f"size(n.`{self.embedding_node_property}`) = "
-                f"toInteger({self.embedding_dimension}) AND "
-            )
+            parallel_query = "CYPHER runtime = parallel " if self._is_enterprise else ""
+            base_index_query = parallel_query + f"MATCH (n:`{self.node_label}`) WHERE "
             base_cosine_query = (
                 " WITH n as node, vector.similarity.cosine("
                 f"n.`{self.embedding_node_property}`, "
@@ -1010,21 +957,14 @@ class Neo4jVector(VectorStore):
             index_query = base_index_query + filter_snippets + base_cosine_query
 
         else:
-            index_query = _get_search_index_query(self.search_type, self._index_type)
+            index_query = _get_search_index_query(self.search_type)
             filter_params = {}
 
-        if self._index_type == IndexType.RELATIONSHIP:
-            default_retrieval = (
-                f"RETURN relationship.`{self.text_node_property}` AS text, score, "
-                f"relationship {{.*, `{self.text_node_property}`: Null, "
-                f"`{self.embedding_node_property}`: Null, id: Null }} AS metadata"
-            )
-        else:
-            default_retrieval = (
-                f"RETURN node.`{self.text_node_property}` AS text, score, "
-                f"node {{.*, `{self.text_node_property}`: Null, "
-                f"`{self.embedding_node_property}`: Null, id: Null }} AS metadata"
-            )
+        default_retrieval = (
+            f"RETURN node.`{self.text_node_property}` AS text, score, "
+            f"node {{.*, `{self.text_node_property}`: Null, "
+            f"`{self.embedding_node_property}`: Null, id: Null }} AS metadata"
+        )
 
         retrieval_query = (
             self.retrieval_query if self.retrieval_query else default_retrieval
@@ -1042,19 +982,6 @@ class Neo4jVector(VectorStore):
         }
 
         results = self.query(read_query, params=parameters)
-
-        if any(result["text"] is None for result in results):
-            if not self.retrieval_query:
-                raise ValueError(
-                    f"Make sure that none of the `{self.text_node_property}` "
-                    f"properties on nodes with label `{self.node_label}` "
-                    "are missing or empty"
-                )
-            else:
-                raise ValueError(
-                    "Inspect the `retrieval_query` and ensure it doesn't "
-                    "return None for the `text` column"
-                )
 
         docs = [
             (
@@ -1195,15 +1122,7 @@ class Neo4jVector(VectorStore):
             **kwargs,
         )
 
-        embedding_dimension, index_type = store.retrieve_existing_index()
-
-        # Raise error if relationship index type
-        if index_type == "RELATIONSHIP":
-            raise ValueError(
-                "Relationship vector index is not supported with "
-                "`from_existing_index` method. Please use the "
-                "`from_existing_relationship_index` method."
-            )
+        embedding_dimension = store.retrieve_existing_index()
 
         if not embedding_dimension:
             raise ValueError(
@@ -1233,61 +1152,6 @@ class Neo4jVector(VectorStore):
                     raise ValueError(
                         "Vector and keyword index don't index the same node label"
                     )
-
-        return store
-
-    @classmethod
-    def from_existing_relationship_index(
-        cls: Type[Neo4jVector],
-        embedding: Embeddings,
-        index_name: str,
-        search_type: SearchType = DEFAULT_SEARCH_TYPE,
-        **kwargs: Any,
-    ) -> Neo4jVector:
-        """
-        Get instance of an existing Neo4j relationship vector index.
-        This method will return the instance of the store without
-        inserting any new embeddings.
-        Neo4j credentials are required in the form of `url`, `username`,
-        and `password` and optional `database` parameters along with
-        the `index_name` definition.
-        """
-
-        if search_type == SearchType.HYBRID:
-            raise ValueError(
-                "Hybrid search is not supported in combination "
-                "with relationship vector index"
-            )
-
-        store = cls(
-            embedding=embedding,
-            index_name=index_name,
-            **kwargs,
-        )
-
-        embedding_dimension, index_type = store.retrieve_existing_index()
-
-        if not embedding_dimension:
-            raise ValueError(
-                "The specified vector index name does not exist. "
-                "Make sure to check if you spelled it correctly"
-            )
-        # Raise error if relationship index type
-        if index_type == "NODE":
-            raise ValueError(
-                "Node vector index is not supported with "
-                "`from_existing_relationship_index` method. Please use the "
-                "`from_existing_index` method."
-            )
-
-        # Check if embedding function and vector index dimensions match
-        if not store.embedding_dimension == embedding_dimension:
-            raise ValueError(
-                "The provided embedding function and vector index "
-                "dimensions do not match.\n"
-                f"Embedding function dimension: {store.embedding_dimension}\n"
-                f"Vector index dimension: {embedding_dimension}"
-            )
 
         return store
 
@@ -1383,15 +1247,7 @@ class Neo4jVector(VectorStore):
         )
 
         # Check if the vector index already exists
-        embedding_dimension, index_type = store.retrieve_existing_index()
-
-        # Raise error if relationship index type
-        if index_type == "RELATIONSHIP":
-            raise ValueError(
-                "`from_existing_graph` method does not support "
-                " existing relationship vector index. "
-                "Please use `from_existing_relationship_index` method"
-            )
+        embedding_dimension = store.retrieve_existing_index()
 
         # If the vector index doesn't exist yet
         if not embedding_dimension:

@@ -1,9 +1,6 @@
 import glob
 import importlib
-import subprocess
 from pathlib import Path
-
-import pytest
 
 
 def test_importable_all() -> None:
@@ -16,12 +13,3 @@ def test_importable_all() -> None:
         all_ = getattr(module, "__all__", [])
         for cls_ in all_:
             getattr(module, cls_)
-
-        # Test import in isolation
-        # Note: ImportErrors due to circular imports can be raised
-        # for one sequence of imports but not another.
-        result = subprocess.run(
-            ["python", "-c", f"import langchain_core.{module_name}"],
-        )
-        if result.returncode != 0:
-            pytest.fail(f"Failed to import {module_name}.")

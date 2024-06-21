@@ -3,7 +3,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, Union
 
 import yaml
 
@@ -125,9 +125,7 @@ def _load_prompt(config: dict) -> PromptTemplate:
     return PromptTemplate(**config)
 
 
-def load_prompt(
-    path: Union[str, Path], encoding: Optional[str] = None
-) -> BasePromptTemplate:
+def load_prompt(path: Union[str, Path]) -> BasePromptTemplate:
     """Unified method for loading a prompt from LangChainHub or local fs."""
     if isinstance(path, str) and path.startswith("lc://"):
         raise RuntimeError(
@@ -135,12 +133,10 @@ def load_prompt(
             "Please use the new LangChain Hub at https://smith.langchain.com/hub "
             "instead."
         )
-    return _load_prompt_from_file(path, encoding)
+    return _load_prompt_from_file(path)
 
 
-def _load_prompt_from_file(
-    file: Union[str, Path], encoding: Optional[str] = None
-) -> BasePromptTemplate:
+def _load_prompt_from_file(file: Union[str, Path]) -> BasePromptTemplate:
     """Load prompt from file."""
     # Convert file to a Path object.
     if isinstance(file, str):
@@ -149,10 +145,10 @@ def _load_prompt_from_file(
         file_path = file
     # Load from either json or yaml.
     if file_path.suffix == ".json":
-        with open(file_path, encoding=encoding) as f:
+        with open(file_path) as f:
             config = json.load(f)
     elif file_path.suffix.endswith((".yaml", ".yml")):
-        with open(file_path, mode="r", encoding=encoding) as f:
+        with open(file_path, "r") as f:
             config = yaml.safe_load(f)
     else:
         raise ValueError(f"Got unsupported file type {file_path.suffix}")

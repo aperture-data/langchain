@@ -14,14 +14,10 @@ ARG PYTHON_VIRTUALENV_HOME=/home/vscode/langchain-py-env \
 ENV POETRY_VIRTUALENVS_IN_PROJECT=false \
     POETRY_NO_INTERACTION=true 
 
-# Install Poetry outside of the v`irtual environment to avoid conflicts
-RUN python3 -m pip install --user pipx && \
-    python3 -m pipx ensurepath && \
-    pipx install poetry==${POETRY_VERSION}
-
-# Create a Python virtual environment for the project
+# Create a Python virtual environment for Poetry and install it
 RUN python3 -m venv ${PYTHON_VIRTUALENV_HOME} && \
-    $PYTHON_VIRTUALENV_HOME/bin/pip install --upgrade pip
+    $PYTHON_VIRTUALENV_HOME/bin/pip install --upgrade pip && \
+    $PYTHON_VIRTUALENV_HOME/bin/pip install poetry==${POETRY_VERSION}
 
 ENV PATH="$PYTHON_VIRTUALENV_HOME/bin:$PATH" \
     VIRTUAL_ENV=$PYTHON_VIRTUALENV_HOME
@@ -52,9 +48,6 @@ COPY libs/community/ ../community/
 
 # Copy the text-splitters library for installation
 COPY libs/text-splitters/ ../text-splitters/
-
-# Copy the partners library for installation
-COPY libs/partners ../partners/
 
 # Install the Poetry dependencies (this layer will be cached as long as the dependencies don't change)
 RUN poetry install --no-interaction --no-ansi --with dev,test,docs

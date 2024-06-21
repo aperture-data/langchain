@@ -121,13 +121,13 @@ class NeptuneRdfGraph:
                     )
 
         except ImportError:
-            raise ImportError(
+            raise ModuleNotFoundError(
                 "Could not import boto3 python package. "
                 "Please install it with `pip install boto3`."
             )
         except Exception as e:
             if type(e).__name__ == "UnknownServiceError":
-                raise ImportError(
+                raise ModuleNotFoundError(
                     "NeptuneGraph requires a boto3 version 1.28.38 or greater."
                     "Please install it with `pip install -U boto3`."
                 ) from e

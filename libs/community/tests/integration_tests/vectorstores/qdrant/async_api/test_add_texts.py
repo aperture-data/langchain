@@ -7,7 +7,7 @@ from langchain_community.vectorstores import Qdrant
 from tests.integration_tests.vectorstores.fake_embeddings import (
     ConsistentFakeEmbeddings,
 )
-from tests.integration_tests.vectorstores.qdrant.async_api.fixtures import (
+from tests.integration_tests.vectorstores.qdrant.async_api.fixtures import (  # noqa
     qdrant_locations,
 )
 

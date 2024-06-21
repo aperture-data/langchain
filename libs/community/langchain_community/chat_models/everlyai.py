@@ -89,7 +89,7 @@ class ChatEverlyAI(ChatOpenAI):
             import openai
 
         except ImportError as e:
-            raise ImportError(
+            raise ValueError(
                 "Could not import openai python package. "
                 "Please install it with `pip install openai`.",
             ) from e

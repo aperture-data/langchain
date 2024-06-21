@@ -1,12 +1,10 @@
-from langchain_community.retrievers import __all__, _module_lookup
+from langchain_community.retrievers import __all__
 
 EXPECTED_ALL = [
     "AmazonKendraRetriever",
     "AmazonKnowledgeBasesRetriever",
     "ArceeRetriever",
     "ArxivRetriever",
-    "AskNewsRetriever",
-    "AzureAISearchRetriever",
     "AzureCognitiveSearchRetriever",
     "BreebsRetriever",
     "ChatGPTPluginRetriever",
@@ -30,26 +28,19 @@ EXPECTED_ALL = [
     "PubMedRetriever",
     "QdrantSparseVectorRetriever",
     "RemoteLangChainRetriever",
-    "RememberizerRetriever",
     "SVMRetriever",
     "TavilySearchAPIRetriever",
-    "NeuralDBRetriever",
-    "RememberizerRetriever",
     "TFIDFRetriever",
     "BM25Retriever",
     "VespaRetriever",
     "WeaviateHybridSearchRetriever",
     "WikipediaRetriever",
-    "WebResearchRetriever",
     "YouRetriever",
     "ZepRetriever",
-    "ZepCloudRetriever",
     "ZillizRetriever",
     "DocArrayRetriever",
-    "NeuralDBRetriever",
 ]
 
 
 def test_all_imports() -> None:
     assert set(__all__) == set(EXPECTED_ALL)
-    assert set(__all__) == set(_module_lookup.keys())

@@ -1,11 +1,9 @@
-from langchain_community.storage import __all__, _module_lookup
+from langchain_community.storage import __all__
 
 EXPECTED_ALL = [
     "AstraDBStore",
     "AstraDBByteStore",
-    "CassandraByteStore",
     "MongoDBStore",
-    "SQLStore",
     "RedisStore",
     "UpstashRedisByteStore",
     "UpstashRedisStore",
@@ -14,4 +12,3 @@ EXPECTED_ALL = [
 
 def test_all_imports() -> None:
     assert set(__all__) == set(EXPECTED_ALL)
-    assert set(__all__) == set(_module_lookup.keys())

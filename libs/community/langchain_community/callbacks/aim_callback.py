@@ -4,16 +4,23 @@ from typing import Any, Dict, List, Optional
 from langchain_core.agents import AgentAction, AgentFinish
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_core.outputs import LLMResult
-from langchain_core.utils import guard_import
 
 
 def import_aim() -> Any:
     """Import the aim python package and raise an error if it is not installed."""
-    return guard_import("aim")
+    try:
+        import aim
+    except ImportError:
+        raise ImportError(
+            "To use the Aim callback manager you need to have the"
+            " `aim` python package installed."
+            "Please install it with `pip install aim`"
+        )
+    return aim
 
 
 class BaseMetadataCallbackHandler:
-    """Callback handler for the metadata and associated function states for callbacks.
+    """This class handles the metadata and associated function states for callbacks.
 
     Attributes:
         step (int): The current step.

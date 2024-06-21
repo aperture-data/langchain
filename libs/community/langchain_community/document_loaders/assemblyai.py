@@ -29,7 +29,8 @@ class TranscriptFormat(Enum):
 
 
 class AssemblyAIAudioTranscriptLoader(BaseLoader):
-    """Load AssemblyAI audio transcripts.
+    """
+    Loader for AssemblyAI audio transcripts.
 
     It uses the AssemblyAI API to transcribe audio files
     and loads the transcribed text into one or more Documents,
@@ -109,7 +110,7 @@ class AssemblyAIAudioTranscriptLoader(BaseLoader):
 
 class AssemblyAIAudioLoaderById(BaseLoader):
     """
-    Load AssemblyAI audio transcripts.
+    Loader for AssemblyAI audio transcripts.
 
     It uses the AssemblyAI API to get an existing transcription
     and loads the transcribed text into one or more Documents,

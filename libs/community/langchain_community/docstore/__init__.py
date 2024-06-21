@@ -16,18 +16,7 @@ The **Docstore** is a simplified version of the Document Loader.
 """
 
 import importlib
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    from langchain_community.docstore.arbitrary_fn import (
-        DocstoreFn,
-    )
-    from langchain_community.docstore.in_memory import (
-        InMemoryDocstore,
-    )
-    from langchain_community.docstore.wikipedia import (
-        Wikipedia,
-    )
+from typing import Any
 
 _module_lookup = {
     "DocstoreFn": "langchain_community.docstore.arbitrary_fn",
@@ -43,4 +32,4 @@ def __getattr__(name: str) -> Any:
     raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
-__all__ = ["DocstoreFn", "InMemoryDocstore", "Wikipedia"]
+__all__ = list(_module_lookup.keys())

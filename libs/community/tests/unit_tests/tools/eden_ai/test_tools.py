@@ -5,7 +5,7 @@ import pytest
 
 from langchain_community.tools.edenai import EdenAiTextModerationTool
 
-tool = EdenAiTextModerationTool(  # type: ignore[call-arg]
+tool = EdenAiTextModerationTool(
     providers=["openai"], language="en", edenai_api_key="fake_key"
 )
 
@@ -100,6 +100,6 @@ def test_parse_response_format(mock_post: MagicMock) -> None:
     ]
     mock_post.return_value = mock_response
 
-    result = tool.invoke("some query")
+    result = tool("some query")
 
     assert result == 'nsfw_likelihood: 5\n"offensive": 4\n"hate_speech": 5'

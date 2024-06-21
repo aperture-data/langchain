@@ -22,9 +22,9 @@ class EdenAiObjectDetectionTool(EdenaiTool):
 
     """
 
-    name: str = "edenai_object_detection"
+    name = "edenai_object_detection"
 
-    description: str = (
+    description = (
         "A wrapper around edenai Services Object Detection . "
         """Useful for when you have to do an  to identify and locate
         (with bounding boxes) objects in an image """
@@ -33,8 +33,8 @@ class EdenAiObjectDetectionTool(EdenaiTool):
 
     show_positions: bool = False
 
-    feature: str = "image"
-    subfeature: str = "object_detection"
+    feature = "image"
+    subfeature = "object_detection"
 
     def _parse_json(self, json_data: dict) -> str:
         result = []

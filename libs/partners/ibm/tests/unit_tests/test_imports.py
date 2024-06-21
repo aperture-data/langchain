@@ -1,6 +1,6 @@
 from langchain_ibm import __all__
 
-EXPECTED_ALL = ["WatsonxLLM", "WatsonxEmbeddings"]
+EXPECTED_ALL = ["WatsonxLLM"]
 
 
 def test_all_imports() -> None:

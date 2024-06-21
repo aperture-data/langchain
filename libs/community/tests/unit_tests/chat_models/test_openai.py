@@ -1,7 +1,6 @@
 """Test OpenAI Chat API wrapper."""
-
 import json
-from typing import Any, List
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -18,19 +17,10 @@ from langchain_community.chat_models.openai import ChatOpenAI
 
 @pytest.mark.requires("openai")
 def test_openai_model_param() -> None:
-    test_cases: List[dict] = [
-        {"model_name": "foo", "openai_api_key": "foo"},
-        {"model": "foo", "openai_api_key": "foo"},
-        {"model_name": "foo", "api_key": "foo"},
-        {"model_name": "foo", "openai_api_key": "foo", "max_retries": 2},
-    ]
-
-    for case in test_cases:
-        llm = ChatOpenAI(**case)
-        assert llm.model_name == "foo", "Model name should be 'foo'"
-        assert llm.openai_api_key == "foo", "API key should be 'foo'"
-        assert hasattr(llm, "max_retries"), "max_retries attribute should exist"
-        assert llm.max_retries == 2, "max_retries default should be set to 2"
+    llm = ChatOpenAI(model="foo", openai_api_key="foo")
+    assert llm.model_name == "foo"
+    llm = ChatOpenAI(model_name="foo", openai_api_key="foo")
+    assert llm.model_name == "foo"
 
 
 def test_function_message_dict_to_function_message() -> None:
@@ -91,7 +81,7 @@ def mock_completion() -> dict:
 
 @pytest.mark.requires("openai")
 def test_openai_predict(mock_completion: dict) -> None:
-    llm = ChatOpenAI(openai_api_key="foo")  # type: ignore[call-arg]
+    llm = ChatOpenAI(openai_api_key="foo")
     mock_client = MagicMock()
     completed = False
 
@@ -106,14 +96,14 @@ def test_openai_predict(mock_completion: dict) -> None:
         "client",
         mock_client,
     ):
-        res = llm.invoke("bar")
-        assert res.content == "Bar Baz"
+        res = llm.predict("bar")
+        assert res == "Bar Baz"
     assert completed
 
 
 @pytest.mark.requires("openai")
 async def test_openai_apredict(mock_completion: dict) -> None:
-    llm = ChatOpenAI(openai_api_key="foo")  # type: ignore[call-arg]
+    llm = ChatOpenAI(openai_api_key="foo")
     mock_client = MagicMock()
     completed = False
 

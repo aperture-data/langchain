@@ -40,12 +40,12 @@ stream_completion_with_retry = None
 
 
 def is_codey_model(model_name: str) -> bool:
-    """Return True if the model name is a Codey model."""
+    """Returns True if the model name is a Codey model."""
     return "code" in model_name
 
 
 def is_gemini_model(model_name: str) -> bool:
-    """Return True if the model name is a Gemini model."""
+    """Returns True if the model name is a Gemini model."""
     return model_name is not None and "gemini" in model_name
 
 
@@ -203,7 +203,7 @@ class _VertexAICommon(_VertexAIBase):
 
 @deprecated(
     since="0.0.12",
-    removal="0.3.0",
+    removal="0.2.0",
     alternative_import="langchain_google_vertexai.VertexAI",
 )
 class VertexAI(_VertexAICommon, BaseLLM):
@@ -363,7 +363,7 @@ class VertexAI(_VertexAICommon, BaseLLM):
             generations.append(
                 [self._response_to_generation(r) for r in res.candidates]
             )
-        return LLMResult(generations=generations)  # type: ignore[arg-type]
+        return LLMResult(generations=generations)
 
     def _stream(
         self,
@@ -393,11 +393,11 @@ class VertexAI(_VertexAICommon, BaseLLM):
 
 @deprecated(
     since="0.0.12",
-    removal="0.3.0",
+    removal="0.2.0",
     alternative_import="langchain_google_vertexai.VertexAIModelGarden",
 )
 class VertexAIModelGarden(_VertexAIBase, BaseLLM):
-    """Vertex AI Model Garden large language models."""
+    """Large language models served from Vertex AI Model Garden."""
 
     client: "PredictionServiceClient" = None  #: :meta private:
     async_client: "PredictionServiceAsyncClient" = None  #: :meta private:

@@ -5,9 +5,10 @@ import zipfile
 from pathlib import Path
 from typing import Dict, Iterator, List, Union
 
-from langchain_core.chat_loaders import BaseChatLoader
 from langchain_core.chat_sessions import ChatSession
 from langchain_core.messages import AIMessage, HumanMessage
+
+from langchain_community.chat_loaders.base import BaseChatLoader
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ class SlackChatLoader(BaseChatLoader):
                 )
             else:
                 results.append(
-                    HumanMessage(  # type: ignore[call-arg]
+                    HumanMessage(
                         role=sender,
                         content=text,
                         additional_kwargs={

@@ -199,7 +199,7 @@ class TextGen(LLM):
 
                 from langchain_community.llms import TextGen
                 llm = TextGen(model_url="http://localhost:5000")
-                llm.invoke("Write a story about llamas.")
+                llm("Write a story about llamas.")
         """
         if self.streaming:
             combined_text_output = ""
@@ -245,7 +245,7 @@ class TextGen(LLM):
 
                 from langchain_community.llms import TextGen
                 llm = TextGen(model_url="http://localhost:5000")
-                llm.invoke("Write a story about llamas.")
+                llm("Write a story about llamas.")
         """
         if self.streaming:
             combined_text_output = ""
@@ -330,13 +330,13 @@ class TextGen(LLM):
             result = websocket_client.recv()
             result = json.loads(result)
 
-            if result["event"] == "text_stream":  # type: ignore[call-overload, index]
+            if result["event"] == "text_stream":
                 chunk = GenerationChunk(
-                    text=result["text"],  # type: ignore[call-overload, index]
+                    text=result["text"],
                     generation_info=None,
                 )
                 yield chunk
-            elif result["event"] == "stream_end":  # type: ignore[call-overload, index]
+            elif result["event"] == "stream_end":
                 websocket_client.close()
                 return
 
@@ -403,13 +403,13 @@ class TextGen(LLM):
             result = websocket_client.recv()
             result = json.loads(result)
 
-            if result["event"] == "text_stream":  # type: ignore[call-overload, index]
+            if result["event"] == "text_stream":
                 chunk = GenerationChunk(
-                    text=result["text"],  # type: ignore[call-overload, index]
+                    text=result["text"],
                     generation_info=None,
                 )
                 yield chunk
-            elif result["event"] == "stream_end":  # type: ignore[call-overload, index]
+            elif result["event"] == "stream_end":
                 websocket_client.close()
                 return
 

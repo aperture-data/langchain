@@ -1,5 +1,4 @@
 """Wrapper around Perplexity APIs."""
-
 from __future__ import annotations
 
 import logging
@@ -64,12 +63,10 @@ class ChatPerplexity(BaseChatModel):
     """What sampling temperature to use."""
     model_kwargs: Dict[str, Any] = Field(default_factory=dict)
     """Holds any model parameters valid for `create` call not explicitly specified."""
-    pplx_api_key: Optional[str] = Field(None, alias="api_key")
+    pplx_api_key: Optional[str] = None
     """Base URL path for API requests, 
     leave blank if not using a proxy or service emulator."""
-    request_timeout: Optional[Union[float, Tuple[float, float]]] = Field(
-        None, alias="timeout"
-    )
+    request_timeout: Optional[Union[float, Tuple[float, float]]] = None
     """Timeout for requests to PerplexityChat completion API. Default is 600 seconds."""
     max_retries: int = 6
     """Maximum number of retries to make when generating."""
@@ -120,7 +117,7 @@ class ChatPerplexity(BaseChatModel):
             values, "pplx_api_key", "PPLX_API_KEY"
         )
         try:
-            import openai
+            import openai  # noqa: F401
         except ImportError:
             raise ImportError(
                 "Could not import openai python package. "
@@ -198,9 +195,9 @@ class ChatPerplexity(BaseChatModel):
         elif role == "tool" or default_class == ToolMessageChunk:
             return ToolMessageChunk(content=content, tool_call_id=_dict["tool_call_id"])
         elif role or default_class == ChatMessageChunk:
-            return ChatMessageChunk(content=content, role=role)  # type: ignore[arg-type]
+            return ChatMessageChunk(content=content, role=role)
         else:
-            return default_class(content=content)  # type: ignore[call-arg]
+            return default_class(content=content)
 
     def _stream(
         self,

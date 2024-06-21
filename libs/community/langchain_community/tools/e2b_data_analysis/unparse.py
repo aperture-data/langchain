@@ -27,7 +27,7 @@ def interleave(inter, f, seq):
 
 
 class Unparser:
-    """Traverse an AST and
+    """Methods in this class recursively traverse an AST and
     output source code for the abstract syntax; original formatting
     is disregarded."""
 

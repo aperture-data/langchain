@@ -13,9 +13,7 @@ logger = getLogger(__name__)
 
 
 class InfinityEmbeddingsLocal(BaseModel, Embeddings):
-    """Optimized Infinity embedding models.
-
-    https://github.com/michaelfeil/infinity
+    """Optimized Embedding models https://github.com/michaelfeil/infinity
     This class deploys a local Infinity instance to embed text.
     The class requires async usage.
 

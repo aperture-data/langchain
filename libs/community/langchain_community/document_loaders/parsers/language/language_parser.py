@@ -10,7 +10,6 @@ from langchain_community.document_loaders.parsers.language.c import CSegmenter
 from langchain_community.document_loaders.parsers.language.cobol import CobolSegmenter
 from langchain_community.document_loaders.parsers.language.cpp import CPPSegmenter
 from langchain_community.document_loaders.parsers.language.csharp import CSharpSegmenter
-from langchain_community.document_loaders.parsers.language.elixir import ElixirSegmenter
 from langchain_community.document_loaders.parsers.language.go import GoSegmenter
 from langchain_community.document_loaders.parsers.language.java import JavaSegmenter
 from langchain_community.document_loaders.parsers.language.javascript import (
@@ -19,7 +18,6 @@ from langchain_community.document_loaders.parsers.language.javascript import (
 from langchain_community.document_loaders.parsers.language.kotlin import KotlinSegmenter
 from langchain_community.document_loaders.parsers.language.lua import LuaSegmenter
 from langchain_community.document_loaders.parsers.language.perl import PerlSegmenter
-from langchain_community.document_loaders.parsers.language.php import PHPSegmenter
 from langchain_community.document_loaders.parsers.language.python import PythonSegmenter
 from langchain_community.document_loaders.parsers.language.ruby import RubySegmenter
 from langchain_community.document_loaders.parsers.language.rust import RustSegmenter
@@ -44,9 +42,6 @@ LANGUAGE_EXTENSIONS: Dict[str, str] = {
     "pl": "perl",
     "ts": "ts",
     "java": "java",
-    "php": "php",
-    "ex": "elixir",
-    "exs": "elixir",
 }
 
 LANGUAGE_SEGMENTERS: Dict[str, Any] = {
@@ -65,8 +60,6 @@ LANGUAGE_SEGMENTERS: Dict[str, Any] = {
     "perl": PerlSegmenter,
     "ts": TypeScriptSegmenter,
     "java": JavaSegmenter,
-    "php": PHPSegmenter,
-    "elixir": ElixirSegmenter,
 }
 
 Language = Literal[
@@ -93,7 +86,6 @@ Language = Literal[
     "c",
     "lua",
     "perl",
-    "elixir",
 ]
 
 
@@ -112,7 +104,6 @@ class LanguageParser(BaseBlobParser):
     - C++: "cpp" (*)
     - C#: "csharp" (*)
     - COBOL: "cobol"
-    - Elixir: "elixir"
     - Go: "go" (*)
     - Java: "java" (*)
     - JavaScript: "js" (requires package `esprima`)

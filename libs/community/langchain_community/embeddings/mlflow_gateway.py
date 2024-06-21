@@ -13,7 +13,8 @@ def _chunk(texts: List[str], size: int) -> Iterator[List[str]]:
 
 
 class MlflowAIGatewayEmbeddings(Embeddings, BaseModel):
-    """MLflow AI Gateway embeddings.
+    """
+    Wrapper around embeddings LLMs in the MLflow AI Gateway.
 
     To use, you should have the ``mlflow[gateway]`` python package installed.
     For more information, see https://mlflow.org/docs/latest/gateway/index.html.

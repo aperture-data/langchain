@@ -1,14 +1,15 @@
 from typing import List
 
 from langchain_core.pydantic_v1 import root_validator
-from langchain_core.tools import BaseTool, BaseToolkit
+from langchain_core.tools import BaseTool
 
+from langchain_community.agent_toolkits.base import BaseToolkit
 from langchain_community.tools.connery import ConneryService
 
 
 class ConneryToolkit(BaseToolkit):
     """
-    Toolkit with a list of Connery Actions as tools.
+    A LangChain Toolkit with a list of Connery Actions as tools.
     """
 
     tools: List[BaseTool]
@@ -19,7 +20,7 @@ class ConneryToolkit(BaseToolkit):
         """
         return self.tools
 
-    @root_validator(pre=True)
+    @root_validator()
     def validate_attributes(cls, values: dict) -> dict:
         """
         Validate the attributes of the ConneryToolkit class.
@@ -45,6 +46,6 @@ class ConneryToolkit(BaseToolkit):
             ConneryToolkit: The Connery Toolkit.
         """
 
-        instance = cls(tools=connery_service.list_actions())  # type: ignore[arg-type]
+        instance = cls(tools=connery_service.list_actions())
 
         return instance

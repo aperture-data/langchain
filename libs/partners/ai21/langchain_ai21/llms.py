@@ -19,7 +19,7 @@ from langchain_ai21.ai21_base import AI21Base
 
 
 class AI21LLM(BaseLLM, AI21Base):
-    """AI21 large language models.
+    """AI21LLM large language models.
 
     Example:
         .. code-block:: python

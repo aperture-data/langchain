@@ -1,5 +1,4 @@
 """__ModuleName__ large language models."""
-
 from typing import (
     Any,
     AsyncIterator,
@@ -33,7 +32,6 @@ class __ModuleName__LLM(BaseLLM):
         """Return type of LLM."""
         return "__package_name_short__-llm"
 
-    # TODO: This method must be implemented to generate text completions.
     def _generate(
         self,
         prompts: List[str],
@@ -43,7 +41,7 @@ class __ModuleName__LLM(BaseLLM):
     ) -> LLMResult:
         raise NotImplementedError
 
-    # TODO: Implement if __ModuleName__LLM supports async generation. Otherwise
+    # TODO: Implement if __model_name__ supports async generation. Otherwise
     # delete method.
     async def _agenerate(
         self,
@@ -54,7 +52,7 @@ class __ModuleName__LLM(BaseLLM):
     ) -> LLMResult:
         raise NotImplementedError
 
-    # TODO: Implement if __ModuleName__LLM supports streaming. Otherwise delete method.
+    # TODO: Implement if __model_name__ supports streaming. Otherwise delete method.
     def _stream(
         self,
         prompt: str,
@@ -64,7 +62,7 @@ class __ModuleName__LLM(BaseLLM):
     ) -> Iterator[GenerationChunk]:
         raise NotImplementedError
 
-    # TODO: Implement if __ModuleName__LLM supports async streaming. Otherwise delete
+    # TODO: Implement if __model_name__ supports async streaming. Otherwise delete
     # method.
     async def _astream(
         self,

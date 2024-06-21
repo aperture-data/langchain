@@ -32,7 +32,7 @@ class SendMessageSchema(BaseModel):
 
 
 class O365SendMessage(O365BaseTool):
-    """Send an email in Office 365."""
+    """Tool for sending an email in Office 365."""
 
     name: str = "send_email"
     description: str = (

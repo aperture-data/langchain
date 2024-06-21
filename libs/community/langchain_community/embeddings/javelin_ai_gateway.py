@@ -12,7 +12,8 @@ def _chunk(texts: List[str], size: int) -> Iterator[List[str]]:
 
 
 class JavelinAIGatewayEmbeddings(Embeddings, BaseModel):
-    """Javelin AI Gateway embeddings.
+    """
+    Wrapper around embeddings LLMs in the Javelin AI Gateway.
 
     To use, you should have the ``javelin_sdk`` python package installed.
     For more information, see https://docs.getjavelin.io

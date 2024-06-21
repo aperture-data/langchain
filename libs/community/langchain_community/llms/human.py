@@ -33,7 +33,9 @@ def _collect_user_input(
 
 
 class HumanInputLLM(LLM):
-    """User input as the response."""
+    """
+    It returns user input as the response.
+    """
 
     input_func: Callable = Field(default_factory=lambda: _collect_user_input)
     prompt_func: Callable[[str], None] = Field(default_factory=lambda: _display_prompt)

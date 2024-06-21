@@ -3,7 +3,6 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from langchain_core._api.deprecation import deprecated
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
@@ -12,11 +11,6 @@ if TYPE_CHECKING:
     from couchbase.cluster import Cluster
 
 
-@deprecated(
-    since="0.2.4",
-    removal="0.3.0",
-    alternative_import="langchain_couchbase.CouchbaseVectorStore",
-)
 class CouchbaseVectorStore(VectorStore):
     """`Couchbase Vector Store` vector store.
 

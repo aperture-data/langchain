@@ -21,7 +21,7 @@
           "RunnableParallel"
         ],
         "kwargs": {
-          "steps__": {
+          "steps": {
             "buz": {
               "lc": 1,
               "type": "not_implemented",
@@ -74,6 +74,7 @@
           ]
         }
       },
+      "middle": [],
       "last": {
         "lc": 1,
         "type": "constructor",
@@ -108,7 +109,8 @@
                     "buz"
                   ],
                   "template": "what did baz say to {buz}",
-                  "template_format": "f-string"
+                  "template_format": "f-string",
+                  "partial_variables": {}
                 },
                 "name": "PromptTemplate",
                 "graph": {
@@ -149,6 +151,7 @@
                   ]
                 }
               },
+              "middle": [],
               "last": {
                 "lc": 1,
                 "type": "not_implemented",
@@ -197,7 +200,8 @@
                     }
                   ]
                 }
-              }
+              },
+              "name": null
             },
             "name": "RunnableSequence",
             "graph": {
@@ -280,7 +284,8 @@
                       "buz"
                     ],
                     "template": "what did baz say to {buz}",
-                    "template_format": "f-string"
+                    "template_format": "f-string",
+                    "partial_variables": {}
                   },
                   "name": "PromptTemplate",
                   "graph": {
@@ -321,6 +326,7 @@
                     ]
                   }
                 },
+                "middle": [],
                 "last": {
                   "lc": 1,
                   "type": "not_implemented",
@@ -369,7 +375,8 @@
                       }
                     ]
                   }
-                }
+                },
+                "name": null
               },
               "name": "RunnableSequence",
               "graph": {
@@ -438,7 +445,8 @@
               ],
               "repr": "<class 'Exception'>"
             }
-          ]
+          ],
+          "exception_key": null
         },
         "name": "RunnableWithFallbacks",
         "graph": {
@@ -478,7 +486,8 @@
             }
           ]
         }
-      }
+      },
+      "name": null
     },
     "name": "RunnableSequence",
     "graph": {
@@ -560,7 +569,7 @@
           "RunnableParallel"
         ],
         "kwargs": {
-          "steps__": {
+          "steps": {
             "text": {
               "lc": 1,
               "type": "constructor",
@@ -570,7 +579,11 @@
                 "runnable",
                 "RunnablePassthrough"
               ],
-              "kwargs": {},
+              "kwargs": {
+                "func": null,
+                "afunc": null,
+                "input_type": null
+              },
               "name": "RunnablePassthrough",
               "graph": {
                 "nodes": [
@@ -651,6 +664,7 @@
           ]
         }
       },
+      "middle": [],
       "last": {
         "lc": 1,
         "type": "constructor",
@@ -736,7 +750,8 @@
             }
           ]
         }
-      }
+      },
+      "name": null
     },
     "name": "RunnableSequence",
     "graph": {
@@ -918,7 +933,8 @@
           ],
           "repr": "<class 'Exception'>"
         }
-      ]
+      ],
+      "exception_key": null
     },
     "name": "RunnableWithFallbacks",
     "graph": {
@@ -1132,7 +1148,8 @@
           ],
           "repr": "<class 'Exception'>"
         }
-      ]
+      ],
+      "exception_key": null
     },
     "name": "RunnableWithFallbacks",
     "graph": {

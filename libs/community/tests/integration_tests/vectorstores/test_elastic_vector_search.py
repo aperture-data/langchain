@@ -26,7 +26,7 @@ class TestElasticsearch:
             raise ValueError("OPENAI_API_KEY environment variable is not set")
 
     @pytest.fixture(scope="class", autouse=True)
-    def elasticsearch_url(self) -> Union[str, Generator[str, None, None]]:  # type: ignore[return]
+    def elasticsearch_url(self) -> Union[str, Generator[str, None, None]]:
         """Return the elasticsearch url."""
         from elasticsearch import Elasticsearch
 

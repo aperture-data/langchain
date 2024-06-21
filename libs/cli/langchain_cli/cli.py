@@ -1,4 +1,3 @@
-import importlib
 from typing import Optional
 
 import typer
@@ -21,13 +20,6 @@ app.add_typer(
     name="integration",
     help=integration_namespace.__doc__,
 )
-
-
-# If libcst is installed, add the migrate namespace
-if importlib.util.find_spec("libcst"):
-    from langchain_cli.namespaces.migrate import main as migrate_namespace
-
-    app.add_typer(migrate_namespace.app, name="migrate", help=migrate_namespace.__doc__)
 
 
 def version_callback(show_version: bool) -> None:

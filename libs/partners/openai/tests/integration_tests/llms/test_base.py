@@ -6,7 +6,9 @@ from langchain_core.callbacks import CallbackManager
 from langchain_core.outputs import LLMResult
 
 from langchain_openai import OpenAI
-from tests.unit_tests.fake.callbacks import FakeCallbackHandler
+from tests.unit_tests.fake.callbacks import (
+    FakeCallbackHandler,
+)
 
 
 def test_stream() -> None:
@@ -74,7 +76,7 @@ def test_invoke() -> None:
 def test_openai_call() -> None:
     """Test valid call to openai."""
     llm = OpenAI()
-    output = llm.invoke("Say something nice:")
+    output = llm("Say something nice:")
     assert isinstance(output, str)
 
 
@@ -90,11 +92,18 @@ def test_openai_stop_valid() -> None:
     """Test openai stop logic on valid configuration."""
     query = "write an ordered list of five items"
     first_llm = OpenAI(stop="3", temperature=0)
-    first_output = first_llm.invoke(query)
+    first_output = first_llm(query)
     second_llm = OpenAI(temperature=0)
-    second_output = second_llm.invoke(query, stop=["3"])
+    second_output = second_llm(query, stop=["3"])
     # Because it stops on new lines, shouldn't return anything
     assert first_output == second_output
+
+
+def test_openai_stop_error() -> None:
+    """Test openai stop logic on bad configuration."""
+    llm = OpenAI(stop="3", temperature=0)
+    with pytest.raises(ValueError):
+        llm("write an ordered list of five items", stop=["\n"])
 
 
 @pytest.mark.scheduled
@@ -199,7 +208,7 @@ def test_openai_streaming_multiple_prompts_error() -> None:
 def test_openai_streaming_call() -> None:
     """Test valid call to openai."""
     llm = OpenAI(max_tokens=10, streaming=True)
-    output = llm.invoke("Say foo:")
+    output = llm("Say foo:")
     assert isinstance(output, str)
 
 
@@ -214,7 +223,7 @@ def test_openai_streaming_callback() -> None:
         callback_manager=callback_manager,
         verbose=True,
     )
-    llm.invoke("Write me a sentence with 100 words.")
+    llm("Write me a sentence with 100 words.")
 
     # new client sometimes passes 2 tokens at once
     assert callback_handler.llm_streams >= 5

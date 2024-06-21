@@ -99,7 +99,7 @@ class BedrockEmbeddings(BaseModel, Embeddings):
             values["client"] = session.client("bedrock-runtime", **client_params)
 
         except ImportError:
-            raise ImportError(
+            raise ModuleNotFoundError(
                 "Could not import boto3 python package. "
                 "Please install it with `pip install boto3`."
             )

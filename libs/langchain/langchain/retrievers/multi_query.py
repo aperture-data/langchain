@@ -9,10 +9,8 @@ from langchain_core.callbacks import (
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import BaseOutputParser
-from langchain_core.prompts import BasePromptTemplate
 from langchain_core.prompts.prompt import PromptTemplate
 from langchain_core.retrievers import BaseRetriever
-from langchain_core.runnables import Runnable
 
 from langchain.chains.llm import LLMChain
 
@@ -51,7 +49,7 @@ class MultiQueryRetriever(BaseRetriever):
     """
 
     retriever: BaseRetriever
-    llm_chain: Runnable
+    llm_chain: LLMChain
     verbose: bool = True
     parser_key: str = "lines"
     """DEPRECATED. parser_key is no longer used and should not be specified."""
@@ -63,7 +61,7 @@ class MultiQueryRetriever(BaseRetriever):
         cls,
         retriever: BaseRetriever,
         llm: BaseLanguageModel,
-        prompt: BasePromptTemplate = DEFAULT_QUERY_PROMPT,
+        prompt: PromptTemplate = DEFAULT_QUERY_PROMPT,
         parser_key: Optional[str] = None,
         include_original: bool = False,
     ) -> "MultiQueryRetriever":
@@ -79,7 +77,7 @@ class MultiQueryRetriever(BaseRetriever):
             MultiQueryRetriever
         """
         output_parser = LineListOutputParser()
-        llm_chain = prompt | llm | output_parser
+        llm_chain = LLMChain(llm=llm, prompt=prompt, output_parser=output_parser)
         return cls(
             retriever=retriever,
             llm_chain=llm_chain,
@@ -117,13 +115,10 @@ class MultiQueryRetriever(BaseRetriever):
         Returns:
             List of LLM generated queries that are similar to the user input
         """
-        response = await self.llm_chain.ainvoke(
-            {"question": question}, config={"callbacks": run_manager.get_child()}
+        response = await self.llm_chain.acall(
+            inputs={"question": question}, callbacks=run_manager.get_child()
         )
-        if isinstance(self.llm_chain, LLMChain):
-            lines = response["text"]
-        else:
-            lines = response
+        lines = response["text"]
         if self.verbose:
             logger.info(f"Generated queries: {lines}")
         return lines
@@ -141,8 +136,8 @@ class MultiQueryRetriever(BaseRetriever):
         """
         document_lists = await asyncio.gather(
             *(
-                self.retriever.ainvoke(
-                    query, config={"callbacks": run_manager.get_child()}
+                self.retriever.aget_relevant_documents(
+                    query, callbacks=run_manager.get_child()
                 )
                 for query in queries
             )
@@ -180,13 +175,10 @@ class MultiQueryRetriever(BaseRetriever):
         Returns:
             List of LLM generated queries that are similar to the user input
         """
-        response = self.llm_chain.invoke(
-            {"question": question}, config={"callbacks": run_manager.get_child()}
+        response = self.llm_chain(
+            {"question": question}, callbacks=run_manager.get_child()
         )
-        if isinstance(self.llm_chain, LLMChain):
-            lines = response["text"]
-        else:
-            lines = response
+        lines = response["text"]
         if self.verbose:
             logger.info(f"Generated queries: {lines}")
         return lines
@@ -204,8 +196,8 @@ class MultiQueryRetriever(BaseRetriever):
         """
         documents = []
         for query in queries:
-            docs = self.retriever.invoke(
-                query, config={"callbacks": run_manager.get_child()}
+            docs = self.retriever.get_relevant_documents(
+                query, callbacks=run_manager.get_child()
             )
             documents.extend(docs)
         return documents

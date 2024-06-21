@@ -53,9 +53,9 @@ class SearchEmailsInput(BaseModel):
 
 
 class O365SearchEmails(O365BaseTool):
-    """Search email messages in Office 365.
+    """Class for searching email messages in Office 365
 
-    Free, but setup is required.
+    Free, but setup is required
     """
 
     name: str = "messages_search"

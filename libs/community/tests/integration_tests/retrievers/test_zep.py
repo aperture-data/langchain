@@ -67,24 +67,28 @@ def zep_retriever(
     mock_zep_client.memory.asearch_memory.return_value = copy.deepcopy(  # type: ignore
         search_results
     )
-    zep = ZepRetriever(session_id="123", url="http://localhost:8000")  # type: ignore[call-arg]
+    zep = ZepRetriever(session_id="123", url="http://localhost:8000")
     zep.zep_client = mock_zep_client
     return zep
 
 
 @pytest.mark.requires("zep_python")
-def test_zep_retriever_invoke(
+def test_zep_retriever_get_relevant_documents(
     zep_retriever: ZepRetriever, search_results: List[MemorySearchResult]
 ) -> None:
-    documents: List[Document] = zep_retriever.invoke("My trip to Iceland")
+    documents: List[Document] = zep_retriever.get_relevant_documents(
+        query="My trip to Iceland"
+    )
     _test_documents(documents, search_results)
 
 
 @pytest.mark.requires("zep_python")
-async def test_zep_retriever_ainvoke(
+async def test_zep_retriever_aget_relevant_documents(
     zep_retriever: ZepRetriever, search_results: List[MemorySearchResult]
 ) -> None:
-    documents: List[Document] = await zep_retriever.ainvoke("My trip to Iceland")
+    documents: List[Document] = await zep_retriever.aget_relevant_documents(
+        query="My trip to Iceland"
+    )
     _test_documents(documents, search_results)
 
 

@@ -21,7 +21,8 @@ class Params(BaseModel, extra=Extra.allow):  # type: ignore[call-arg]
 
 
 class MlflowAIGateway(LLM):
-    """MLflow AI Gateway LLMs.
+    """
+    Wrapper around completions LLMs in the MLflow AI Gateway.
 
     To use, you should have the ``mlflow[gateway]`` python package installed.
     For more information, see https://mlflow.org/docs/latest/gateway/index.html.

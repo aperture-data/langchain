@@ -15,13 +15,11 @@ __all__ = ["InfinityEmbeddings"]
 
 
 class InfinityEmbeddings(BaseModel, Embeddings):
-    """Self-hosted embedding models for `infinity` package.
-
-    See https://github.com/michaelfeil/infinity
-    This also works for text-embeddings-inference and other
+    """Embedding models for self-hosted https://github.com/michaelfeil/infinity
+    This should also work for text-embeddings-inference and other
     self-hosted openai-compatible servers.
 
-    Infinity is a package to interact with Embedding Models on https://github.com/michaelfeil/infinity
+    Infinity is a class to interact with Embedding Models on https://github.com/michaelfeil/infinity
 
 
     Example:
@@ -117,9 +115,7 @@ class InfinityEmbeddings(BaseModel, Embeddings):
 
 
 class TinyAsyncOpenAIInfinityEmbeddingClient:  #: :meta private:
-    """Helper tool to embed Infinity.
-
-    It is not a part of Langchain's stable API,
+    """A helper tool to embed Infinity. Not part of Langchain's stable API,
     direct use discouraged.
 
     Example:
@@ -182,7 +178,7 @@ class TinyAsyncOpenAIInfinityEmbeddingClient:  #: :meta private:
         length_sorted_idx = np.argsort([-sorter(sen) for sen in texts])
         texts_sorted = [texts[idx] for idx in length_sorted_idx]
 
-        return texts_sorted, lambda unsorted_embeddings: [  # E731
+        return texts_sorted, lambda unsorted_embeddings: [  # noqa E731
             unsorted_embeddings[idx] for idx in np.argsort(length_sorted_idx)
         ]
 

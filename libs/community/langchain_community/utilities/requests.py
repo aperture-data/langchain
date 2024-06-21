@@ -18,7 +18,6 @@ class Requests(BaseModel):
     headers: Optional[Dict[str, str]] = None
     aiosession: Optional[aiohttp.ClientSession] = None
     auth: Optional[Any] = None
-    verify: Optional[bool] = True
 
     class Config:
         """Configuration for this pydantic object."""
@@ -28,48 +27,29 @@ class Requests(BaseModel):
 
     def get(self, url: str, **kwargs: Any) -> requests.Response:
         """GET the URL and return the text."""
-        return requests.get(
-            url, headers=self.headers, auth=self.auth, verify=self.verify, **kwargs
-        )
+        return requests.get(url, headers=self.headers, auth=self.auth, **kwargs)
 
     def post(self, url: str, data: Dict[str, Any], **kwargs: Any) -> requests.Response:
         """POST to the URL and return the text."""
         return requests.post(
-            url,
-            json=data,
-            headers=self.headers,
-            auth=self.auth,
-            verify=self.verify,
-            **kwargs,
+            url, json=data, headers=self.headers, auth=self.auth, **kwargs
         )
 
     def patch(self, url: str, data: Dict[str, Any], **kwargs: Any) -> requests.Response:
         """PATCH the URL and return the text."""
         return requests.patch(
-            url,
-            json=data,
-            headers=self.headers,
-            auth=self.auth,
-            verify=self.verify,
-            **kwargs,
+            url, json=data, headers=self.headers, auth=self.auth, **kwargs
         )
 
     def put(self, url: str, data: Dict[str, Any], **kwargs: Any) -> requests.Response:
         """PUT the URL and return the text."""
         return requests.put(
-            url,
-            json=data,
-            headers=self.headers,
-            auth=self.auth,
-            verify=self.verify,
-            **kwargs,
+            url, json=data, headers=self.headers, auth=self.auth, **kwargs
         )
 
     def delete(self, url: str, **kwargs: Any) -> requests.Response:
         """DELETE the URL and return the text."""
-        return requests.delete(
-            url, headers=self.headers, auth=self.auth, verify=self.verify, **kwargs
-        )
+        return requests.delete(url, headers=self.headers, auth=self.auth, **kwargs)
 
     @asynccontextmanager
     async def _arequest(
@@ -79,22 +59,12 @@ class Requests(BaseModel):
         if not self.aiosession:
             async with aiohttp.ClientSession() as session:
                 async with session.request(
-                    method,
-                    url,
-                    headers=self.headers,
-                    auth=self.auth,
-                    verify=self.verify,
-                    **kwargs,
+                    method, url, headers=self.headers, auth=self.auth, **kwargs
                 ) as response:
                     yield response
         else:
             async with self.aiosession.request(
-                method,
-                url,
-                headers=self.headers,
-                auth=self.auth,
-                verify=self.verify,
-                **kwargs,
+                method, url, headers=self.headers, auth=self.auth, **kwargs
             ) as response:
                 yield response
 
@@ -146,7 +116,6 @@ class GenericRequestsWrapper(BaseModel):
     aiosession: Optional[aiohttp.ClientSession] = None
     auth: Optional[Any] = None
     response_content_type: Literal["text", "json"] = "text"
-    verify: bool = True
 
     class Config:
         """Configuration for this pydantic object."""
@@ -157,10 +126,7 @@ class GenericRequestsWrapper(BaseModel):
     @property
     def requests(self) -> Requests:
         return Requests(
-            headers=self.headers,
-            aiosession=self.aiosession,
-            auth=self.auth,
-            verify=self.verify,
+            headers=self.headers, aiosession=self.aiosession, auth=self.auth
         )
 
     def _get_resp_content(self, response: Response) -> Union[str, Dict[str, Any]]:

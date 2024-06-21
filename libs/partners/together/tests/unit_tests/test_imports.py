@@ -1,6 +1,10 @@
 from langchain_together import __all__
 
-EXPECTED_ALL = ["ChatTogether", "TogetherEmbeddings", "Together"]
+EXPECTED_ALL = [
+    "__version__",
+    "Together",
+    "TogetherEmbeddings",
+]
 
 
 def test_all_imports() -> None:

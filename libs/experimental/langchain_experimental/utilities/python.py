@@ -1,7 +1,6 @@
 import functools
 import logging
 import multiprocessing
-import re
 import sys
 from io import StringIO
 from typing import Dict, Optional
@@ -23,23 +22,6 @@ class PythonREPL(BaseModel):
     globals: Optional[Dict] = Field(default_factory=dict, alias="_globals")
     locals: Optional[Dict] = Field(default_factory=dict, alias="_locals")
 
-    @staticmethod
-    def sanitize_input(query: str) -> str:
-        """Sanitize input to the python REPL.
-
-        Remove whitespace, backtick & python
-        (if llm mistakes python console as terminal)
-
-        Args:
-            query: The query to sanitize
-
-        Returns:
-            str: The sanitized query
-        """
-        query = re.sub(r"^(\s|`)*(?i:python)?\s*", "", query)
-        query = re.sub(r"(\s|`)*$", "", query)
-        return query
-
     @classmethod
     def worker(
         cls,
@@ -51,8 +33,7 @@ class PythonREPL(BaseModel):
         old_stdout = sys.stdout
         sys.stdout = mystdout = StringIO()
         try:
-            cleaned_command = cls.sanitize_input(command)
-            exec(cleaned_command, globals, locals)
+            exec(command, globals, locals)
             sys.stdout = old_stdout
             queue.put(mystdout.getvalue())
         except Exception as e:

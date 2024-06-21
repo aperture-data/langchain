@@ -537,9 +537,7 @@ if __name__ == "__main__":
         "nfcampos",
         "efriis",
         "eyurtsev",
-        "rlancemartin",
-        "ccurme",
-        "vbarda",
+        "rlancemartin"
     }
     hidden_logins = {
         "dev2049",

@@ -59,7 +59,7 @@ class VikingDB(VectorStore):
         try:
             from volcengine.viking_db import Collection, VikingDBService
         except ImportError:
-            raise ImportError(
+            raise ValueError(
                 "Could not import volcengine python package. "
                 "Please install it with `pip install --upgrade volcengine`."
             )
@@ -104,7 +104,7 @@ class VikingDB(VectorStore):
         try:
             from volcengine.viking_db import Field, FieldType
         except ImportError:
-            raise ImportError(
+            raise ValueError(
                 "Could not import volcengine python package. "
                 "Please install it with `pip install --upgrade volcengine`."
             )
@@ -115,27 +115,19 @@ class VikingDB(VectorStore):
                 # print(key, value)
                 if isinstance(value, str):
                     fields.append(Field(key, FieldType.String))
-                elif isinstance(value, int):
+                if isinstance(value, int):
                     fields.append(Field(key, FieldType.Int64))
-                elif isinstance(value, bool):
+                if isinstance(value, bool):
                     fields.append(Field(key, FieldType.Bool))
-                elif isinstance(value, list) and all(
+                if isinstance(value, list) and all(
                     isinstance(item, str) for item in value
                 ):
                     fields.append(Field(key, FieldType.List_String))
-                elif isinstance(value, list) and all(
+                if isinstance(value, list) and all(
                     isinstance(item, int) for item in value
                 ):
                     fields.append(Field(key, FieldType.List_Int64))
-                elif isinstance(value, bytes):
-                    fields.append(Field(key, FieldType.Text))
-                else:
-                    raise ValueError(
-                        "metadatas value is invalid"
-                        "please change the type of metadatas."
-                    )
-        # fields.append(Field("text", FieldType.String))
-        fields.append(Field("text", FieldType.Text))
+        fields.append(Field("text", FieldType.String))
 
         fields.append(Field("primary_key", FieldType.String, is_primary_key=True))
 
@@ -147,7 +139,7 @@ class VikingDB(VectorStore):
         try:
             from volcengine.viking_db import VectorIndexParams
         except ImportError:
-            raise ImportError(
+            raise ValueError(
                 "Could not import volcengine python package. "
                 "Please install it with `pip install --upgrade volcengine`."
             )
@@ -185,7 +177,7 @@ class VikingDB(VectorStore):
         try:
             from volcengine.viking_db import Data
         except ImportError:
-            raise ImportError(
+            raise ValueError(
                 "Could not import volcengine python package. "
                 "Please install it with `pip install --upgrade volcengine`."
             )

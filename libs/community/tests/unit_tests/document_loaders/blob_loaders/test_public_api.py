@@ -6,7 +6,6 @@ def test_public_api() -> None:
     assert sorted(__all__) == [
         "Blob",
         "BlobLoader",
-        "CloudBlobLoader",
         "FileSystemBlobLoader",
         "YoutubeAudioLoader",
     ]

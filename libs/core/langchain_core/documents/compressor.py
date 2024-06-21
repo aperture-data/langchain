@@ -10,20 +10,7 @@ from langchain_core.runnables import run_in_executor
 
 
 class BaseDocumentCompressor(BaseModel, ABC):
-    """Base class for document compressors.
-
-    This abstraction is primarily used for
-    post-processing of retrieved documents.
-
-    Documents matching a given query are first retrieved.
-    Then the list of documents can be further processed.
-
-    For example, one could re-rank the retrieved documents
-    using an LLM.
-
-    **Note** users should favor using a RunnableLambda
-    instead of sub-classing from this interface.
-    """
+    """Base class for document compressors."""
 
     @abstractmethod
     def compress_documents(

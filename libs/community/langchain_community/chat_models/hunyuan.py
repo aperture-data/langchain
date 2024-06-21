@@ -72,9 +72,9 @@ def _convert_delta_to_message_chunk(
     elif role == "assistant" or default_class == AIMessageChunk:
         return AIMessageChunk(content=content)
     elif role or default_class == ChatMessageChunk:
-        return ChatMessageChunk(content=content, role=role)  # type: ignore[arg-type]
+        return ChatMessageChunk(content=content, role=role)
     else:
-        return default_class(content=content)  # type: ignore[call-arg]
+        return default_class(content=content)
 
 
 # signature generation
@@ -90,7 +90,7 @@ def _signature(secret_key: SecretStr, url: str, payload: Dict[str, Any]) -> str:
         value = payload[key]
 
         if isinstance(value, list) or isinstance(value, dict):
-            value = json.dumps(value, separators=(",", ":"), ensure_ascii=False)
+            value = json.dumps(value, separators=(",", ":"))
         elif isinstance(value, float):
             value = "%g" % value
 
@@ -266,11 +266,6 @@ class ChatHunyuan(BaseChatModel):
 
         default_chunk_class = AIMessageChunk
         for chunk in res.iter_lines():
-            chunk = chunk.decode(encoding="UTF-8", errors="strict").replace(
-                "data: ", ""
-            )
-            if len(chunk) == 0:
-                continue
             response = json.loads(chunk)
             if "error" in response:
                 raise ValueError(f"Error from Hunyuan api response: {response}")

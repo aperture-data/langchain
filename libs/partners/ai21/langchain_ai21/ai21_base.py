@@ -9,8 +9,6 @@ _DEFAULT_TIMEOUT_SEC = 300
 
 
 class AI21Base(BaseModel):
-    """Base class for AI21 models."""
-
     class Config:
         arbitrary_types_allowed = True
 

@@ -27,12 +27,10 @@ Then initialize
 from langchain_core.messages import HumanMessage
 from langchain_ai21.chat_models import ChatAI21
 
-chat = ChatAI21(model="jamab-instruct")
+chat = ChatAI21(model="j2-ultra")
 messages = [HumanMessage(content="Hello from AI21")]
 chat.invoke(messages)
 ```
-
-For a list of the supported models, see [this page](https://docs.ai21.com/reference/python-sdk#chat)
 
 ## LLMs
 You can use AI21's generative AI models as Langchain LLMs:

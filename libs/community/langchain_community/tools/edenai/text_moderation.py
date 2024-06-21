@@ -22,9 +22,9 @@ class EdenAiTextModerationTool(EdenaiTool):
 
     """
 
-    name: str = "edenai_explicit_content_detection_text"
+    name = "edenai_explicit_content_detection_text"
 
-    description: str = (
+    description = (
         "A wrapper around edenai Services explicit content detection for text. "
         """Useful for when you have to scan text for offensive, 
         sexually explicit or suggestive content,

@@ -65,10 +65,7 @@ class GoogleLensAPIWrapper(BaseModel):
             return "Google Lens search failed"
 
         xs = ""
-        if (
-            "knowledge_graph" in responseValue
-            and len(responseValue["knowledge_graph"]) > 0
-        ):
+        if len(responseValue["knowledge_graph"]) > 0:
             subject = responseValue["knowledge_graph"][0]
             xs += f"Subject:{subject['title']}({subject['subtitle']})\n"
             xs += f"Link to subject:{subject['link']}\n\n"
@@ -77,11 +74,10 @@ class GoogleLensAPIWrapper(BaseModel):
             xs += f"Title: {image['title']}\n"
             xs += f"Source({image['source']}): {image['link']}\n"
             xs += f"Image: {image['thumbnail']}\n\n"
-        if "reverse_image_search" in responseValue:
-            xs += (
-                "Reverse Image Search"
-                + f"Link: {responseValue['reverse_image_search']['link']}\n"
-            )
+        xs += (
+            "Reverse Image Search"
+            + f"Link: {responseValue['reverse_image_search']['link']}\n"
+        )
         print(xs)  # noqa: T201
 
         docs = [xs]

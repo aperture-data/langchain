@@ -14,7 +14,6 @@ from typing import (
     Tuple,
 )
 
-from langchain_core._api.deprecation import deprecated
 from langchain_core.callbacks import (
     AsyncCallbackManagerForLLMRun,
     CallbackManagerForLLMRun,
@@ -339,7 +338,7 @@ class BedrockBase(BaseModel, ABC):
         "amazon": "stopSequences",
         "ai21": "stop_sequences",
         "cohere": "stop_sequences",
-        "mistral": "stop",
+        "mistral": "stop_sequences",
     }
 
     guardrails: Optional[Mapping[str, Any]] = {
@@ -424,7 +423,7 @@ class BedrockBase(BaseModel, ABC):
             values["client"] = session.client("bedrock-runtime", **client_params)
 
         except ImportError:
-            raise ImportError(
+            raise ModuleNotFoundError(
                 "Could not import boto3 python package. "
                 "Please install it with `pip install boto3`."
             )
@@ -712,9 +711,6 @@ class BedrockBase(BaseModel, ABC):
                 run_manager.on_llm_new_token(chunk.text, chunk=chunk)  # type: ignore[unused-coroutine]
 
 
-@deprecated(
-    since="0.0.34", removal="0.3", alternative_import="langchain_aws.BedrockLLM"
-)
 class Bedrock(LLM, BedrockBase):
     """Bedrock models.
 
@@ -829,7 +825,7 @@ class Bedrock(LLM, BedrockBase):
         Example:
             .. code-block:: python
 
-                response = llm.invoke("Tell me a joke.")
+                response = llm("Tell me a joke.")
         """
 
         if self.streaming:

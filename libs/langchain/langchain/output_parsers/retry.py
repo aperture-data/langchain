@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, TypeVar, Union
+from typing import Any, TypeVar
 
 from langchain_core.exceptions import OutputParserException
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import BaseOutputParser
 from langchain_core.prompt_values import PromptValue
 from langchain_core.prompts import BasePromptTemplate, PromptTemplate
-from langchain_core.runnables import RunnableSerializable
 
 NAIVE_COMPLETION_RETRY = """Prompt:
 {prompt}
@@ -35,7 +34,7 @@ T = TypeVar("T")
 
 
 class RetryOutputParser(BaseOutputParser[T]):
-    """Wrap a parser and try to fix parsing errors.
+    """Wraps a parser and tries to fix parsing errors.
 
     Does this by passing the original prompt and the completion to another
     LLM, and telling it the completion did not satisfy criteria in the prompt.
@@ -44,12 +43,10 @@ class RetryOutputParser(BaseOutputParser[T]):
     parser: BaseOutputParser[T]
     """The parser to use to parse the output."""
     # Should be an LLMChain but we want to avoid top-level imports from langchain.chains
-    retry_chain: Union[RunnableSerializable, Any]
-    """The RunnableSerializable to use to retry the completion (Legacy: LLMChain)."""
+    retry_chain: Any
+    """The LLMChain to use to retry the completion."""
     max_retries: int = 1
     """The maximum number of times to retry the parse."""
-    legacy: bool = True
-    """Whether to use the run or arun method of the retry_chain."""
 
     @classmethod
     def from_llm(
@@ -70,7 +67,9 @@ class RetryOutputParser(BaseOutputParser[T]):
         Returns:
             RetryOutputParser
         """
-        chain = prompt | llm
+        from langchain.chains.llm import LLMChain
+
+        chain = LLMChain(llm=llm, prompt=prompt)
         return cls(parser=parser, retry_chain=chain, max_retries=max_retries)
 
     def parse_with_prompt(self, completion: str, prompt_value: PromptValue) -> T:
@@ -93,19 +92,9 @@ class RetryOutputParser(BaseOutputParser[T]):
                     raise e
                 else:
                     retries += 1
-                    if self.legacy and hasattr(self.retry_chain, "run"):
-                        completion = self.retry_chain.run(
-                            prompt=prompt_value.to_string(),
-                            completion=completion,
-                            error=repr(e),
-                        )
-                    else:
-                        completion = self.retry_chain.invoke(
-                            dict(
-                                prompt=prompt_value.to_string(),
-                                input=completion,
-                            )
-                        )
+                    completion = self.retry_chain.run(
+                        prompt=prompt_value.to_string(), completion=completion
+                    )
 
         raise OutputParserException("Failed to parse")
 
@@ -129,19 +118,9 @@ class RetryOutputParser(BaseOutputParser[T]):
                     raise e
                 else:
                     retries += 1
-                    if self.legacy and hasattr(self.retry_chain, "arun"):
-                        completion = await self.retry_chain.arun(
-                            prompt=prompt_value.to_string(),
-                            completion=completion,
-                            error=repr(e),
-                        )
-                    else:
-                        completion = await self.retry_chain.ainvoke(
-                            dict(
-                                prompt=prompt_value.to_string(),
-                                input=completion,
-                            )
-                        )
+                    completion = await self.retry_chain.arun(
+                        prompt=prompt_value.to_string(), completion=completion
+                    )
 
         raise OutputParserException("Failed to parse")
 
@@ -157,13 +136,9 @@ class RetryOutputParser(BaseOutputParser[T]):
     def _type(self) -> str:
         return "retry"
 
-    @property
-    def OutputType(self) -> type[T]:
-        return self.parser.OutputType
-
 
 class RetryWithErrorOutputParser(BaseOutputParser[T]):
-    """Wrap a parser and try to fix parsing errors.
+    """Wraps a parser and tries to fix parsing errors.
 
     Does this by passing the original prompt, the completion, AND the error
     that was raised to another language model and telling it that the completion
@@ -174,13 +149,11 @@ class RetryWithErrorOutputParser(BaseOutputParser[T]):
 
     parser: BaseOutputParser[T]
     """The parser to use to parse the output."""
-    # Should be an LLMChain but we want to avoid top-level imports from langchain.chains  # noqa: E501
-    retry_chain: Union[RunnableSerializable, Any]
-    """The RunnableSerializable to use to retry the completion (Legacy: LLMChain)."""
+    # Should be an LLMChain but we want to avoid top-level imports from langchain.chains
+    retry_chain: Any
+    """The LLMChain to use to retry the completion."""
     max_retries: int = 1
     """The maximum number of times to retry the parse."""
-    legacy: bool = True
-    """Whether to use the run or arun method of the retry_chain."""
 
     @classmethod
     def from_llm(
@@ -201,10 +174,12 @@ class RetryWithErrorOutputParser(BaseOutputParser[T]):
         Returns:
             A RetryWithErrorOutputParser.
         """
-        chain = prompt | llm
+        from langchain.chains.llm import LLMChain
+
+        chain = LLMChain(llm=llm, prompt=prompt)
         return cls(parser=parser, retry_chain=chain, max_retries=max_retries)
 
-    def parse_with_prompt(self, completion: str, prompt_value: PromptValue) -> T:  # noqa: E501
+    def parse_with_prompt(self, completion: str, prompt_value: PromptValue) -> T:
         retries = 0
 
         while retries <= self.max_retries:
@@ -215,20 +190,11 @@ class RetryWithErrorOutputParser(BaseOutputParser[T]):
                     raise e
                 else:
                     retries += 1
-                    if self.legacy and hasattr(self.retry_chain, "run"):
-                        completion = self.retry_chain.run(
-                            prompt=prompt_value.to_string(),
-                            completion=completion,
-                            error=repr(e),
-                        )
-                    else:
-                        completion = self.retry_chain.invoke(
-                            dict(
-                                input=completion,
-                                prompt=prompt_value.to_string(),
-                                error=repr(e),
-                            )
-                        )
+                    completion = self.retry_chain.run(
+                        prompt=prompt_value.to_string(),
+                        completion=completion,
+                        error=repr(e),
+                    )
 
         raise OutputParserException("Failed to parse")
 
@@ -243,20 +209,11 @@ class RetryWithErrorOutputParser(BaseOutputParser[T]):
                     raise e
                 else:
                     retries += 1
-                    if self.legacy and hasattr(self.retry_chain, "arun"):
-                        completion = await self.retry_chain.arun(
-                            prompt=prompt_value.to_string(),
-                            completion=completion,
-                            error=repr(e),
-                        )
-                    else:
-                        completion = await self.retry_chain.ainvoke(
-                            dict(
-                                prompt=prompt_value.to_string(),
-                                input=completion,
-                                error=repr(e),
-                            )
-                        )
+                    completion = await self.retry_chain.arun(
+                        prompt=prompt_value.to_string(),
+                        completion=completion,
+                        error=repr(e),
+                    )
 
         raise OutputParserException("Failed to parse")
 
@@ -271,7 +228,3 @@ class RetryWithErrorOutputParser(BaseOutputParser[T]):
     @property
     def _type(self) -> str:
         return "retry_with_error"
-
-    @property
-    def OutputType(self) -> type[T]:
-        return self.parser.OutputType

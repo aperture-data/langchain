@@ -1,5 +1,4 @@
 """Agent that interacts with OpenAPI APIs via a hierarchical planning approach."""
-
 import json
 import re
 from functools import partial
@@ -253,7 +252,6 @@ def _create_api_controller_agent(
     api_docs: str,
     requests_wrapper: RequestsWrapper,
     llm: BaseLanguageModel,
-    allow_dangerous_requests: bool,
 ) -> Any:
     from langchain.agents.agent import AgentExecutor
     from langchain.agents.mrkl.base import ZeroShotAgent
@@ -262,15 +260,11 @@ def _create_api_controller_agent(
     get_llm_chain = LLMChain(llm=llm, prompt=PARSING_GET_PROMPT)
     post_llm_chain = LLMChain(llm=llm, prompt=PARSING_POST_PROMPT)
     tools: List[BaseTool] = [
-        RequestsGetToolWithParsing(  # type: ignore[call-arg]
-            requests_wrapper=requests_wrapper,
-            llm_chain=get_llm_chain,
-            allow_dangerous_requests=allow_dangerous_requests,
+        RequestsGetToolWithParsing(
+            requests_wrapper=requests_wrapper, llm_chain=get_llm_chain
         ),
-        RequestsPostToolWithParsing(  # type: ignore[call-arg]
-            requests_wrapper=requests_wrapper,
-            llm_chain=post_llm_chain,
-            allow_dangerous_requests=allow_dangerous_requests,
+        RequestsPostToolWithParsing(
+            requests_wrapper=requests_wrapper, llm_chain=post_llm_chain
         ),
     ]
     prompt = PromptTemplate(
@@ -296,7 +290,6 @@ def _create_api_controller_tool(
     api_spec: ReducedOpenAPISpec,
     requests_wrapper: RequestsWrapper,
     llm: BaseLanguageModel,
-    allow_dangerous_requests: bool,
 ) -> Tool:
     """Expose controller as a tool.
 
@@ -325,9 +318,7 @@ def _create_api_controller_tool(
             if not found_match:
                 raise ValueError(f"{endpoint_name} endpoint does not exist.")
 
-        agent = _create_api_controller_agent(
-            base_url, docs_str, requests_wrapper, llm, allow_dangerous_requests
-        )
+        agent = _create_api_controller_agent(base_url, docs_str, requests_wrapper, llm)
         return agent.run(plan_str)
 
     return Tool(
@@ -345,24 +336,15 @@ def create_openapi_agent(
     callback_manager: Optional[BaseCallbackManager] = None,
     verbose: bool = True,
     agent_executor_kwargs: Optional[Dict[str, Any]] = None,
-    allow_dangerous_requests: bool = False,
     **kwargs: Any,
 ) -> Any:
-    """Construct an OpenAI API planner and controller for a given spec.
+    """Instantiate OpenAI API planner and controller for a given spec.
 
     Inject credentials via requests_wrapper.
 
     We use a top-level "orchestrator" agent to invoke the planner and controller,
     rather than a top-level planner
     that invokes a controller with its plan. This is to keep the planner simple.
-
-    You need to set allow_dangerous_requests to True to use Agent with BaseRequestsTool.
-    Requests can be dangerous and can lead to security vulnerabilities.
-    For example, users can ask a server to make a request to an internal
-    server. It's recommended to use requests through a proxy server
-    and avoid accepting inputs from untrusted sources without proper sandboxing.
-    Please see: https://python.langchain.com/docs/security
-    for further security information.
     """
     from langchain.agents.agent import AgentExecutor
     from langchain.agents.mrkl.base import ZeroShotAgent
@@ -370,9 +352,7 @@ def create_openapi_agent(
 
     tools = [
         _create_api_planner_tool(api_spec, llm),
-        _create_api_controller_tool(
-            api_spec, requests_wrapper, llm, allow_dangerous_requests
-        ),
+        _create_api_controller_tool(api_spec, requests_wrapper, llm),
     ]
     prompt = PromptTemplate(
         template=API_ORCHESTRATOR_PROMPT,

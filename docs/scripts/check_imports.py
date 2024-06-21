@@ -1,5 +1,4 @@
 """This script checks documentation for broken import statements."""
-
 import importlib
 import json
 import logging

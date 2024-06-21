@@ -21,9 +21,7 @@ def _litm_reordering(documents: List[Document]) -> List[Document]:
 
 
 class LongContextReorder(BaseDocumentTransformer, BaseModel):
-    """Reorder long context.
-
-    Lost in the middle:
+    """Lost in the middle:
     Performance degrades when models must access relevant information
     in the middle of long contexts.
     See: https://arxiv.org/abs//2307.03172"""
@@ -42,4 +40,4 @@ class LongContextReorder(BaseDocumentTransformer, BaseModel):
     async def atransform_documents(
         self, documents: Sequence[Document], **kwargs: Any
     ) -> Sequence[Document]:
-        return _litm_reordering(list(documents))
+        raise NotImplementedError
