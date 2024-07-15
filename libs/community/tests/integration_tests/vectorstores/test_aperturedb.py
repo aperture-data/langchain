@@ -3,13 +3,13 @@
 import uuid
 
 import pytest
-
 from langchain_standard_tests.integration_tests.vectorstores import (
     AsyncReadWriteTestSuite,
     ReadWriteTestSuite,
 )
 
 from langchain_community.vectorstores import ApertureDB
+
 
 class TestApertureDBReadWriteTestSuite(ReadWriteTestSuite):
     @pytest.fixture
