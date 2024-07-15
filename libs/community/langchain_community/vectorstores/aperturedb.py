@@ -235,8 +235,10 @@ class ApertureDB(VectorStore):
         ]
 
         results, _ = self.utils.execute(query)
-        docs = [self._descriptor_to_document(d) 
-            for d in results[0]["FindDescriptor"].get("entities", [])]
+        docs = [
+            self._descriptor_to_document(d) 
+            for d in results[0]["FindDescriptor"].get("entities", [])
+        ]
         return docs
 
     @override
@@ -481,7 +483,7 @@ class ApertureDB(VectorStore):
         ]
         if ids_to_delete:
             self.delete(ids_to_delete)
-        
+
         texts = [doc.page_content for doc in items]
         metadatas = [
             doc.metadata if getattr(doc, "metadata", None) is not None else {}
@@ -512,3 +514,4 @@ class ApertureDB(VectorStore):
         loader = ParallelLoader(self.connection)
         loader.ingest(data, batchsize=BATCHSIZE)
         return UpsertResponse(succeeded=ids, failed=[])
+        
