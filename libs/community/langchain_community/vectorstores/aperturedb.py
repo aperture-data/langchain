@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Type
 
 # Third-party imports
 import numpy as np
@@ -463,7 +463,7 @@ class ApertureDB(VectorStore):
         """Insert or update items
 
         Updating documents is dependent on the documents' `id` attribute.
-        
+
         Args:
             items: List of Document objects to upsert
 

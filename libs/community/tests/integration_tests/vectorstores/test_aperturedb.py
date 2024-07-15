@@ -1,7 +1,6 @@
 """Test ApertureDB functionality."""
 
 import uuid
-from typing import List, Optional
 
 import pytest
 from langchain_core.documents import Document
@@ -11,11 +10,6 @@ from langchain_standard_tests.integration_tests.vectorstores import (
 )
 
 from langchain_community.vectorstores import ApertureDB
-from tests.integration_tests.vectorstores.fake_embeddings import (
-    FakeEmbeddings,
-    fake_texts,
-)
-
 
 class TestApertureDBReadWriteTestSuite(ReadWriteTestSuite):
     @pytest.fixture
@@ -31,4 +25,3 @@ class TestAsyncApertureDBReadWriteTestSuite(AsyncReadWriteTestSuite):
         descriptor_set = uuid.uuid4().hex  # Fresh descriptor set for each test
         return ApertureDB(embeddings=self.get_embeddings(),
             descriptor_set=descriptor_set)
-            
