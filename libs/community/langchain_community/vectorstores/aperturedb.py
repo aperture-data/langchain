@@ -236,7 +236,7 @@ class ApertureDB(VectorStore):
 
         results, _ = self.utils.execute(query)
         docs = [
-            self._descriptor_to_document(d) 
+            self._descriptor_to_document(d)
             for d in results[0]["FindDescriptor"].get("entities", [])
         ]
         return docs
@@ -514,4 +514,3 @@ class ApertureDB(VectorStore):
         loader = ParallelLoader(self.connection)
         loader.ingest(data, batchsize=BATCHSIZE)
         return UpsertResponse(succeeded=ids, failed=[])
-        
