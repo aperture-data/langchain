@@ -1,5 +1,6 @@
 """Test ApertureDB functionality."""
 
+import sys
 import uuid
 
 import pytest
@@ -9,6 +10,11 @@ from langchain_standard_tests.integration_tests.vectorstores import (
 )
 
 from langchain_community.vectorstores import ApertureDB
+
+pytestmark = pytest.mark.skipif(
+    sys.version_info < (3, 10),
+    reason="The ApertureDB SDK requires Python 3.10 or later",
+)
 
 
 class TestApertureDBReadWriteTestSuite(ReadWriteTestSuite):

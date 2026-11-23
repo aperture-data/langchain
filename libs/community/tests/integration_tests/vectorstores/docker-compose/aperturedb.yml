@@ -2,6 +2,9 @@ services:
   aperturedb:
     image: aperturedata/aperturedb-standalone:latest
     restart: on-failure:0
-    container_name: aperturedb
+    environment:
+      ADB_MASTER_KEY: admin
+      ADB_FORCE_SSL: "false"
+      ADB_KVGD_DB_SIZE: 1024
     ports:
-      - 55555:55555
+      - "127.0.0.1:55555:55555"
