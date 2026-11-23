@@ -46,11 +46,6 @@ jobs:
         if: startsWith(inputs.working-directory, 'libs/community') && matrix.python-version == '3.11'
         with:
           version: 1.3.0
-      - uses: docker/login-action@v3
-        if: startsWith(inputs.working-directory, 'libs/community') && matrix.python-version == '3.11'
-        with:
-          username: ${{ fromJson(secrets.DOCKERHUB).username }}
-          password: ${{ fromJson(secrets.DOCKERHUB).password }}
       - name: Install the released ApertureDB wheel
         if: startsWith(inputs.working-directory, 'libs/community') && matrix.python-version == '3.11'
         run: poetry run python "${{ github.workspace }}/libs/community/scripts/install_aperturedb_sdk.py"
